@@ -24,8 +24,19 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+         $dusk = 'php artisan dusk Tests/Browser';
+
+         $schedule->command("{$dusk}/ExampleTest")
+             ->everyFiveMinutes()
+             ->before(function() {
+                 sleep(rand(0,300));
+             })
+             ->sendOutputTo(base_path('storage/logs/scheduleLog.log'));
+    }
+
+    private function dusk()
+    {
+
     }
 
     /**

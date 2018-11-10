@@ -11,7 +11,16 @@
 |
 */
 
-Route::get('/', function () {
-//    return view('welcome');
+Route::get('/test', function () {
+
+    (new \Tests\Browser\ExampleTest)->testBasicExample();
 
 });
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
