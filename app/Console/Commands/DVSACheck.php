@@ -56,13 +56,15 @@ class DVSACheck extends Command
          * @var $browser \Tpccdaniel\DuskSecure\Browser
         */
 
-            $browser->visit('https://munn.pro');
-            $browser->pause(5000);
+            $browser->visit('https://munn.pro')
+                    ->pause(5000);
+
             try {
                 $browser->assertSee('available');
             } catch (\Exception $e) {
                 $browser->screenshot('failed');
             }
+
             $browser->screenshot('passed');
         });
         return 'test';
