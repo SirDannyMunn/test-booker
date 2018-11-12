@@ -1,6 +1,6 @@
 <?php
 
-namespace Dusk\Browser;
+namespace App\Browser;
 
 use Dusk\DuskTestCase;
 use Tpccdaniel\DuskSecure\Browser;
