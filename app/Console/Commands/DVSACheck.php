@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Scrapers\Browser;
+use App\Browser\Browser;
 
 class DVSACheck extends Command
 {
