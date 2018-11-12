@@ -13,7 +13,7 @@ class DVSA extends DuskTestCase
      * @return void
      * @throws \Throwable
      */
-    public function checkForChanges()
+    public function testCheckForChanges()
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('https://google.com')
@@ -22,6 +22,3 @@ class DVSA extends DuskTestCase
         });
     }
 }
-
-\App\Scrapers\DuskTestCase::startChromeDriver();
-(new \App\Scrapers\Browser\DVSA)->checkForChanges();
