@@ -1,11 +1,11 @@
 <?php
 
-namespace Dusk\Browser;
+namespace App\Scrapers\Browser;
 
 use App\Scrapers\DuskTestCase;
 use Tpccdaniel\DuskSecure\Browser;
 
-class ExampleTest extends DuskTestCase
+class DVSA extends DuskTestCase
 {
     /**
      * A basic browser test example.
@@ -13,11 +13,15 @@ class ExampleTest extends DuskTestCase
      * @return void
      * @throws \Throwable
      */
-    public function testBasicExample()
+    public function checkForChanges()
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('https://google.com')
+                    ->screenshot('test')
                     ->assertSee('Laravel');
         });
     }
 }
+
+\App\Scrapers\DuskTestCase::startChromeDriver();
+(new \App\Scrapers\Browser\DVSA)->checkForChanges();
