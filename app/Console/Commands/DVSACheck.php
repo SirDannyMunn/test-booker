@@ -4,7 +4,12 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Browser\Browser;
+use Illuminate\Support\Facades\Log;
 
+/**
+ * Class DVSACheck
+ * @package App\Console\Commands
+ */
 class DVSACheck extends Command
 {
     /**
@@ -47,8 +52,18 @@ class DVSACheck extends Command
     public function handle()
     {
         $this->browser->browse(function ($browser) {
-                $browser->visit('https://google.com');
-                $browser->screenshot('test');
+        /**
+         * @var $browser \Tpccdaniel\DuskSecure\Browser
+        */
+
+            $browser->visit('https://munn.pro');
+            $browser->pause(5000);
+            try {
+                $browser->assertSee('available');
+            } catch (\Exception $e) {
+                $browser->screenshot('failed');
+            }
+            $browser->screenshot('passed');
         });
         return 'test';
     }
