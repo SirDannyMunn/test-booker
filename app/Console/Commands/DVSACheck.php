@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Browser\Browser;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Class DVSACheck
@@ -51,22 +50,32 @@ class DVSACheck extends Command
      */
     public function handle()
     {
-        $this->browser->browse(function ($browser) {
+        $data['username'] = '';
+        $data['password'] = '';
+
+        $this->browser->browse(function ($browser) use ($data) {
         /**
          * @var $browser \Tpccdaniel\DuskSecure\Browser
         */
 
-            $browser->visit('https://munn.pro')
-                    ->pause(5000);
+            $browser->visit('https://www.gov.uk/change-driving-test')
+                    ->press('Start now')
+                    ->type('username', $data['username'])
+                    ->type('password', $data['password'])
+                    ->press('booking-login')
+                    ->click('#booking-login');
 
-            try {
-                $browser->assertSee('available');
-            } catch (\Exception $e) {
-                $browser->screenshot('failed');
+            $captcha = $browser->assertPresent('recaptcha_challenge_image');
+            if ($captcha) {
+                // Do something
             }
+
+            $browser->click('#date-time-change')
+                    ->click('test-choice-earliest');
+
+            $slots = $browser->attribute('.SlotPicker-slot-label', 'data-datetime-label');
 
             $browser->screenshot('passed');
         });
-        return 'test';
     }
 }
