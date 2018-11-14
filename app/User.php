@@ -27,4 +27,20 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\hasOne
+     */
+    public function location()
+    {
+        return $this->hasOne('App\Location');
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function locations()
+    {
+        return $this->belongsToMany('App\Location')->using('App\UserLocation');
+    }
 }
