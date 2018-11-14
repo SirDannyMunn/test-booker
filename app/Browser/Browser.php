@@ -15,6 +15,10 @@ use Facebook\WebDriver\Remote\DesiredCapabilities;
  */
 class Browser
 {
+
+    /**
+     * @var \Tpccdaniel\DuskSecure\Browser
+     */
     private $browser;
 
     /**
@@ -26,10 +30,18 @@ class Browser
         if (!$this->browser) {
             $this->browser = $this->newBrowser($this->createWebDriver());
         }
+
         try {
             $callback($this->browser);
         } catch (Exception $e) {
-            throw $e;
+            $location = preg_replace('/\s+/', ' ', $e->getMessage());
+            $this->browser->screenshot($location);
+
+            if (get_class($e) != 'PHPUnit\Framework\ExpectationFailedException') {
+                throw $e;
+            }
+
+            return false;
         } catch (Throwable $e) {
             throw $e;
         }

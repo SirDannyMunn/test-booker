@@ -2,8 +2,12 @@
 
 namespace App\Console\Commands;
 
+use Facebook\WebDriver\Remote\HttpCommandExecutor;
+use Facebook\WebDriver\Remote\RemoteWebElement;
+use Facebook\WebDriver\WebDriverBy;
 use Illuminate\Console\Command;
 use App\Browser\Browser;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class DVSACheck
@@ -16,14 +20,14 @@ class DVSACheck extends Command
      *
      * @var string
      */
-    protected $signature = 'dvsa:check';
+    protected $signature = 'dvsa:access';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Checks dvsa website for changes for earlier appointments';
 
     /**
      * @var \Tpccdaniel\DuskSecure\Browser
@@ -50,8 +54,8 @@ class DVSACheck extends Command
      */
     public function handle()
     {
-        $data['username'] = '';
-        $data['password'] = '';
+        $data['username'] = env('TEST_DL_NUMBER');
+        $data['password'] = env('TEST_REF_NUMBER');
 
         $this->browser->browse(function ($browser) use ($data) {
         /**
@@ -59,23 +63,42 @@ class DVSACheck extends Command
         */
 
             $browser->visit('https://www.gov.uk/change-driving-test')
-                    ->press('Start now')
-                    ->type('username', $data['username'])
-                    ->type('password', $data['password'])
-                    ->press('booking-login')
+                    ->clickLink('Start now')
+                    ->type('#driving-licence-number', $data['username'])
+                    ->type('#application-reference-number', $data['password'])
                     ->click('#booking-login');
 
-            $captcha = $browser->assertPresent('recaptcha_challenge_image');
+            $captcha = $browser->checkPresent('recaptcha_challenge_image');
             if ($captcha) {
                 // Do something
+                $browser->screenshot("CAPTCHA-".now());
             }
 
             $browser->click('#date-time-change')
-                    ->click('test-choice-earliest');
+                    ->click('#test-choice-earliest')
+                    ->click('#driving-licence-submit');
 
-            $slots = $browser->attribute('.SlotPicker-slot-label', 'data-datetime-label');
+            $slots = [];
+//          $browser->visit('https://michalsnik.github.io/aos/');
+//          foreach ($browser->elements('.code') as $element) {
+//          <input class="SlotPicker-slot" name="slotTime" type="radio" value="1545210420000" id="slot-1545210420000" data-short-notice="false" data-datetime-label="Wednesday 19 December 2018 9:07am">
+//          <strong class="SlotPicker-time">9:07am</strong>
 
-            $browser->screenshot('passed');
+            foreach (array_slice($browser->elements('.SlotPicker-slot-label'), 10) as $element) {
+                /** @var $element RemoteWebElement */
+                $string = $element->findElement(WebDriverBy::className('SlotPicker-slot'))->getAttribute('data-datetime-label');
+
+                $date = substr($string, 0, strrpos($string, ' '));
+                $time = substr($string, strrpos($string, ' '));
+
+                if(!isset($slots[$date])) {
+                    $slots[$date] = [];
+                }
+
+                array_push($slots[$date], $time);
+            }
+
+            $browser->quit();
         });
     }
 }

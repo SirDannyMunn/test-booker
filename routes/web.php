@@ -13,7 +13,7 @@
 
 Route::get('/test', function () {
 
-    return 'passed';
+//    \Illuminate\Support\Facades\Artisan::call('dvsa:access');
 
 });
 
