@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Location;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -24,19 +25,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-         $dusk = 'php artisan dusk Tests/Browser';
-
-         $schedule->command("{$dusk}/ExampleTest")
-             ->everyFiveMinutes()
-             ->before(function() {
-                 sleep(rand(0,300));
-             })
-             ->sendOutputTo(base_path('storage/logs/scheduleLog.log'));
-    }
-
-    private function dusk()
-    {
-
+        $schedule->call(function() {
+        // Check all locations last_checked_at times
+        $locations = Location::all()->where('last_checked_at', '<', now()->subMinutes(5)->timestamp);
+        // send to process with delay if necessary.
+        // Get best users to use for scraping - ensuring to include all locations.
+        // Add each scrape task to queue
+        })->everyFiveMinutes();
     }
 
     /**

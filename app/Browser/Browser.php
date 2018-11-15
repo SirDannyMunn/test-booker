@@ -36,12 +36,7 @@ class Browser
         } catch (Exception $e) {
             $location = preg_replace('/\s+/', ' ', $e->getMessage());
             $this->browser->screenshot($location);
-
-            if (get_class($e) != 'PHPUnit\Framework\ExpectationFailedException') {
-                throw $e;
-            }
-
-            return false;
+            throw $e;
         } catch (Throwable $e) {
             throw $e;
         }

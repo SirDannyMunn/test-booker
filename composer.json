@@ -15,12 +15,15 @@
     ],
     "require": {
         "php": "^7.1.3",
+        "doctrine/dbal": "^2.8",
         "fideloper/proxy": "^4.0",
-        "tpccdaniel/dusk-secure": "@dev",
         "laravel/framework": "5.7.*",
-        "laravel/tinker": "^1.0"
+        "laravel/tinker": "^1.0",
+        "nexmo/client": "^1.5",
+        "tpccdaniel/dusk-secure": "@dev"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^2.5",
         "beyondcode/laravel-dump-server": "^1.0",
         "filp/whoops": "^2.0",
         "fzaninotto/faker": "^1.4",

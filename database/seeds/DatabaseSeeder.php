@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
 
             $user_locations = $locations->take(rand(1,5));
 
-            $user = factory(App\User::class)->create(['location' => $user_locations[0]]);
+            $user = factory(App\User::class)->create(['location' => $user_locations[0]->name]);
 
             foreach ($user_locations as $user_location) {
 
@@ -26,5 +26,7 @@ class DatabaseSeeder extends Seeder
                 );
             }
         }
+
+        factory(App\User::class, 'admin')->create();
     }
 }

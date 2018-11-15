@@ -28,6 +28,18 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+
+    /**
+     * Route notifications for the Nexmo channel.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return string
+     */
+    public function routeNotificationForNexmo($notification)
+    {
+        return "447421353876";
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\hasOne
      */
@@ -41,6 +53,6 @@ class User extends Authenticatable
      */
     public function locations()
     {
-        return $this->belongsToMany('App\Location')->using('App\UserLocation');
+        return $this->belongsToMany('App\Location', 'user_location')->using('App\UserLocation');
     }
 }

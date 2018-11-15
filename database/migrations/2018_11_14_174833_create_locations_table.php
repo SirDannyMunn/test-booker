@@ -16,6 +16,8 @@ class CreateLocationsTable extends Migration
         Schema::create('locations', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name')->unique();
+            $table->string('last_checked')->default('');
+            $table->integer('times_checked')->default(0);
             $table->timestamps();
         });
     }

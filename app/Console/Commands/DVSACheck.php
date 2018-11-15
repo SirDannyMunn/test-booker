@@ -20,7 +20,7 @@ class DVSACheck extends Command
      *
      * @var string
      */
-    protected $signature = 'dvsa:access';
+    protected $signature = 'dvsa:access {--getslot} {--book}';
 
     /**
      * The console command description.
@@ -78,27 +78,27 @@ class DVSACheck extends Command
                     ->click('#test-choice-earliest')
                     ->click('#driving-licence-submit');
 
-            $slots = [];
-//          $browser->visit('https://michalsnik.github.io/aos/');
-//          foreach ($browser->elements('.code') as $element) {
-//          <input class="SlotPicker-slot" name="slotTime" type="radio" value="1545210420000" id="slot-1545210420000" data-short-notice="false" data-datetime-label="Wednesday 19 December 2018 9:07am">
-//          <strong class="SlotPicker-time">9:07am</strong>
-
-            foreach (array_slice($browser->elements('.SlotPicker-slot-label'), 10) as $element) {
-                /** @var $element RemoteWebElement */
-                $string = $element->findElement(WebDriverBy::className('SlotPicker-slot'))->getAttribute('data-datetime-label');
-
-                $date = substr($string, 0, strrpos($string, ' '));
-                $time = substr($string, strrpos($string, ' '));
-
-                if(!isset($slots[$date])) {
-                    $slots[$date] = [];
-                }
-
-                array_push($slots[$date], $time);
-            }
+            $this->scrapeSlots($browser);
 
             $browser->quit();
         });
+    }
+
+    public function scrapeSlots($browser)
+    {
+        $slots = [];
+        foreach (array_slice($browser->elements('.SlotPicker-slot-label'), 10) as $element) {
+            /** @var $element RemoteWebElement */
+            $string = $element->findElement(WebDriverBy::className('SlotPicker-slot'))->getAttribute('data-datetime-label');
+
+            $date = substr($string, 0, strrpos($string, ' '));
+            $time = substr($string, strrpos($string, ' '));
+
+            if(!isset($slots[$date])) {
+                $slots[$date] = [];
+            }
+
+            array_push($slots[$date], $time);
+        }
     }
 }
