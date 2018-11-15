@@ -4,45 +4,38 @@ Route::get('/test', function () {
 
 //    \Illuminate\Support\Facades\Artisan::call('dvsa:access');
 
-    return now()->subMinutes(5)->timestamp;
-    Auth::user()->notify(new \App\Notifications\ReservationMade(Auth::user()));
+//    Auth::user()->notify(new \App\Notifications\ReservationMade(Auth::user()));
 
-//    $users = \App\User::with('locations')->get();
-//
-//    $location_points = [];
-//    foreach ($users as $user) {
-//        foreach ($user->locations as $location)
-//        isset($location_points[$user->name][$location->name])
-//            ?$location_points[$user->name][$location->name]+=1
-//            :$location_points[$user->name][$location->name]=0;
-//    }
-//
-//    return $location_points;
+    $users = \App\User::with(['locations' => function($location) {
+        return $location->where('last_checked', '<', now()->subMinutes(5)->timestamp);
+    }])->get();
 
-//    $users = \App\User::with('locations')->get();
-//
-//    $locations = $users->pluck('locations')->filter();
-//
-//    $users->transform(function($user) {
-//        return collect($user)->put('location_points', $user->locations->count());
-//    });
-//
-//    return $users;
+    $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
 
+    $best_users = collect();
+    while (filled($locations)) {
+        $location_points = [];
+        foreach ($users as $key => $user) {
+            $location_points[$user->name] = 0;
+            foreach ($user->locations as $location) {
+                // Check each user against remaining locations
+                if ($locations->has($location->name)) {
+                    // If user has one of locations, give point
+                    $location_points[$user->name]+=1;
+                }
+            }
+        }
+        // Collect user with most points
+        $sorted = array_keys(array_sort($location_points));
+        $best_user = end($sorted);
+        $best_users->push($best_user);
+        // Remove user and all user's locations from lists
+        $best_user = $users->where('name', $best_user)->first();
+        $users->forget($users->search($best_user));
+        $locations->forget($best_user->locations->pluck('name')->toArray());
+    }
 
-//    $locations = \App\Location::whereHas('users')->with(['users'])->get();
-//
-//    $users = $locations->pluck('users');
-//
-//    $locations = $locations->transform(function($location) {
-//        $location->users->map(function($user) {
-//            return $user->only('id');
-//        });
-//
-//        return $location;
-//    });
-//
-//    return $locations;
+    return $best_users;
 });
 
 Route::get('/', function () {

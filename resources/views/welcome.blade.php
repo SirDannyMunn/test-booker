@@ -53,7 +53,7 @@
                     <div class="row">
                         <div class="col-md-6 col-sm-6">
                             @include('components.media_item',
-                            ['order'=>'1','title'=>'Notifications','description'=>'We send you a text message automatically when a slot opens','icon'=>'smartphone'])
+                            ['order'=>'1','title'=>'Notifications','description'=>'We send you a text message immediately when a slot opens','icon'=>'smartphone'])
                             @include('components.media_item',
                             ['order'=>'1','title'=>'Completely Automated','description'=>'We look through all UK test centre databases daily <small>(so you don\'t have to!)</small>','icon'=>'meditation'])
                             @include('components.media_item',

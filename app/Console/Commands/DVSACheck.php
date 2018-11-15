@@ -20,7 +20,7 @@ class DVSACheck extends Command
      *
      * @var string
      */
-    protected $signature = 'dvsa:access {--getslot} {--book}';
+    protected $signature = 'dvsa:access {--getslot} {--book} {user?}';
 
     /**
      * The console command description.

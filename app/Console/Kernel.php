@@ -27,11 +27,14 @@ class Kernel extends ConsoleKernel
     {
         $schedule->call(function() {
         // Check all locations last_checked_at times
-        $locations = Location::all()->where('last_checked_at', '<', now()->subMinutes(5)->timestamp);
-        // send to process with delay if necessary.
+        $locations = Location::all()->where('checked_at', '<', now()->subMinutes(5)->timestamp);
         // Get best users to use for scraping - ensuring to include all locations.
+        // send to process with delay if necessary.
+
         // Add each scrape task to queue
         })->everyFiveMinutes();
+
+//        Artisan::call('dvsa:access', ['--getslot'=>1, 'user'=>1]);
     }
 
     /**
