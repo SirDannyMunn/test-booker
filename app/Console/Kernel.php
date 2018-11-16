@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Location;
+use App\User;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -26,12 +27,18 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->call(function() {
-        // Check all locations last_checked_at times
-        $locations = Location::all()->where('checked_at', '<', now()->subMinutes(5)->timestamp);
-        // Get best users to use for scraping - ensuring to include all locations.
-        // send to process with delay if necessary.
+            $users = User::where('booked', false)->with(['locations' => function($location) {
+                return $location->where('last_checked', '<', now()->subMinutes(5)->timestamp);
+            }])->get();
 
-        // Add each scrape task to queue
+            $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
+
+            // Get best users to use for scraping - ensuring to include all locations.
+            $best_users = (new User)->getBest($users, $locations);
+            // send to process with delay if necessary.
+            
+
+            // Add each scrape task to queue
         })->everyFiveMinutes();
 
 //        Artisan::call('dvsa:access', ['--getslot'=>1, 'user'=>1]);

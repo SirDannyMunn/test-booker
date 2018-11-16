@@ -7,10 +7,16 @@ $factory->define(App\User::class, function (Faker $faker) {
     $tiers = ['free', 'paid', 'premium'];
     $location = \App\Location::all()->random()->name;
 
+    $testDate = now()->addMonths(0,2)->addWeeks(1,4)->addDays(1,7);
+
+//    $preferedDate = $testDate->subMonths();
+
     return [
         'name' => $faker->name,
         'email' => $faker->unique()->safeEmail,
         'phone_number' => $faker->phoneNumber,
+        'test_date' => $testDate,
+//        'prefered_date' => $preferedDate,
         'contact_preference' => 'email',
         'email_verified_at' => now(),
         'location' => $location,
@@ -22,10 +28,13 @@ $factory->define(App\User::class, function (Faker $faker) {
 
 $factory->defineAs(App\User::class, 'admin', function (Faker $faker) {
 
+    $testDate = now()->addMonths(0,2)->addWeeks(1,4)->addDays(1,7);
+
     return [
         'name' => 'admin',
         'email' => 'admin@email.com',
         'phone_number' => '07421353876',
+        'test_date' => $testDate,
         'contact_preference' => 'sms',
         'email_verified_at' => now(),
         'location' => 'Skipton',
