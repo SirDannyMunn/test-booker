@@ -1,6 +1,6 @@
 <?php
 
-return [
+$mail = [
 
     /*
     |--------------------------------------------------------------------------
@@ -119,5 +119,13 @@ return [
             resource_path('views/vendor/mail'),
         ],
     ],
-
 ];
+
+if (env('APP_DEBUG')) {
+    $mail['to'] = [
+        'address' => env('DEBUG_EMAIL_ADDRESS'),
+        'name'    => 'Daniel Munn',
+    ];
+}
+
+return $mail;

@@ -16,14 +16,21 @@ class CreateUsersTable extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->string('test_date');
-            $table->string('email')->unique();
-            $table->string('phone_number')->unique();
-            $table->enum('contact_preference', ['sms', 'email']);
-            $table->timestamp('email_verified_at')->nullable();
             $table->enum('tier', ['free', 'paid', 'premium']);
+            $table->boolean('priority');
             $table->boolean('booked')->default(false);
             $table->string('location');
+            $table->timestamp('test_date');
+            $table->string('prefered_date');
+            $table->string('dl_number');
+            $table->string('ref_number');
+            $table->string('email')->unique();
+            $table->string('phone_number')->unique();
+            // Make unique in prod
+//            $table->string('dl_number')->unique();
+//            $table->string('ref_number')->unique();
+            $table->enum('contact_preference', ['sms', 'email']);
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();

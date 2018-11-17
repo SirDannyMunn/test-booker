@@ -5,7 +5,6 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\NexmoMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
 class ReservationMade extends Notification
@@ -13,15 +12,18 @@ class ReservationMade extends Notification
     use Queueable;
 
     protected $user;
+    protected $date;
 
     /**
      * Create a new notification instance.
      *
      * @param $user
+     * @param $date
      */
-    public function __construct($user)
+    public function __construct($user, $date)
     {
         $this->user = $user;
+        $this->date = $date;
     }
 
     /**
@@ -35,7 +37,7 @@ class ReservationMade extends Notification
         if ($this->user->contact_preference == 'sms')
             return ['nexmo'];
 
-        return ['email'];
+        return ['mail'];
     }
 
 
@@ -60,9 +62,12 @@ class ReservationMade extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+                ->greeting('Howdy!')
+                ->line("We have a test available on the {$this->date}")
+                ->line("If you would like this date, please click the button below.
+                 Otherwise, ignore this message and we will send you another date when one comes up.")
+                ->action('Book', url('/'))
+                ->line('Thank you for using our service!');
     }
 
     /**

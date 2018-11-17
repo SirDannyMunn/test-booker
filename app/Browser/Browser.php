@@ -4,6 +4,7 @@ namespace App\Browser;
 
 use Closure;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 use Tpccdaniel\DuskSecure\Browser as DuskBrowser;
 use Facebook\WebDriver\Chrome\ChromeOptions;
@@ -34,8 +35,10 @@ class Browser
         try {
             $callback($this->browser);
         } catch (Exception $e) {
-            $location = preg_replace('/\s+/', ' ', $e->getMessage());
-            $this->browser->screenshot($location);
+//            $filename = now()->format('y-m-d h.m i') .' '. preg_replace('/[^A-Za-z0-9 _ .-]/', ' ', $e->getMessage());
+            $time = now()->format('y-m-d h.m i');
+            Log::alert("{$time} - dusk failed: {$e->getMessage()}");
+            $this->browser->screenshot(now()->format('y-m-d h.m i'));
             throw $e;
         } catch (Throwable $e) {
             throw $e;
@@ -99,6 +102,7 @@ class Browser
         $driver = RemoteWebDriver::create(
             'http://127.0.0.1:9515', $capabilities
         );
+
         return $driver;
     }
 }

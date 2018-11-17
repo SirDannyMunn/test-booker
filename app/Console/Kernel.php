@@ -2,10 +2,12 @@
 
 namespace App\Console;
 
+use App\Http\Controllers\DVSAController;
 use App\Location;
 use App\User;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Artisan;
 
 class Kernel extends ConsoleKernel
 {
@@ -35,8 +37,10 @@ class Kernel extends ConsoleKernel
 
             // Get best users to use for scraping - ensuring to include all locations.
             $best_users = (new User)->getBest($users, $locations);
+
             // send to process with delay if necessary.
-            
+            (new DVSAController)->access();
+//            Artisan::call()
 
             // Add each scrape task to queue
         })->everyFiveMinutes();

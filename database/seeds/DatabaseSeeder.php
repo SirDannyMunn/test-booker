@@ -11,7 +11,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        $locations = factory(App\Location::class, 30)->create();
+//        $locations = factory(App\Location::class, 30)->create();
+
+        $locations = collect();
+        foreach (['Skipton', 'Blackburn', 'Preston', 'Nelson', 'halifax'] as $place) {
+            $locations->push(factory(App\Location::class)->create(['name' => $place]));
+        }
 
         for($i=0; $i<10; $i++) {
 
