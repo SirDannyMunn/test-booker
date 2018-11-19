@@ -2,7 +2,8 @@
 
 Route::get('/test', function () {
 
-    \Illuminate\Support\Facades\Artisan::call('dvsa:access');
+    // \Illuminate\Support\Facades\Artisan::call('dvsa:access');
+    return 'test';
 
 //    Auth::user()->notify(new \App\Notifications\ReservationMade(
 //        Auth::user(),
