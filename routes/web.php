@@ -2,8 +2,8 @@
 
 Route::get('/test', function () {
 
-    // \Illuminate\Support\Facades\Artisan::call('dvsa:access');
-    return 'test';
+//    Auth::user()->notify(new \App\Notifications\ReservationMade(Auth::user(), '12:00'));
+//      return \Illuminate\Support\Facades\Artisan::call('dvsa:access');
 
 //    Auth::user()->notify(new \App\Notifications\ReservationMade(
 //        Auth::user(),
@@ -15,10 +15,10 @@ Route::get('/test', function () {
 //    }])->get();
 
 //    $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
-
+//
 //    return $best_users = (new App\User)->getBest($users, $locations);
-
-//    \Illuminate\Support\Facades\Artisan::call('dvsa:access');
+//
+    \Illuminate\Support\Facades\Artisan::call('dvsa:access');
 
 });
 

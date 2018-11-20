@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\NexmoMessage;
 use Illuminate\Notifications\Notification;
@@ -13,17 +14,19 @@ class ReservationMade extends Notification
 
     protected $user;
     protected $date;
+    protected $location;
 
     /**
      * Create a new notification instance.
      *
      * @param $user
-     * @param $date
+     * @param $data
      */
-    public function __construct($user, $date)
+    public function __construct($user, $data)
     {
         $this->user = $user;
-        $this->date = $date;
+        $this->location = $data['location'];
+        $this->date = Carbon::parse($data['date'])->format('d/m/y h:m');
     }
 
     /**
@@ -61,9 +64,12 @@ class ReservationMade extends Notification
      */
     public function toMail($notifiable)
     {
+        $test_date = Carbon::parse($this->user->test_date)->format('d/m/y h:m');
+
         return (new MailMessage)
-                ->greeting('Howdy!')
-                ->line("We have a test available on the {$this->date}")
+                ->greeting("Hi {$this->user->name}!")
+                ->line("Your test is on at {$test_date}")
+                ->line("We have a test available at {$this->date} at {$this->location} test centre")
                 ->line("If you would like this date, please click the button below.
                  Otherwise, ignore this message and we will send you another date when one comes up.")
                 ->action('Book', url('/'))
