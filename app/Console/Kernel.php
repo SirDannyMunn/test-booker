@@ -17,7 +17,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+
     ];
 
     /**
@@ -33,17 +33,18 @@ class Kernel extends ConsoleKernel
                 return $location->where('last_checked', '<', now()->subMinutes(5)->timestamp);
             }])->get();
 
-            $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
-
             // Get best users to use for scraping - ensuring to include all locations.
-            $best_users = (new User)->getBest($users, $locations);
+//            $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
+//            $best_users = (new User)->getBest($users, $locations);
 
             // send to process with delay if necessary.
-            (new DVSAController)->access();
-//            Artisan::call()
+//            (new DVSAController)->access();
+                Artisan::call('dvsa:access');
+
+//            Artisan::queue('dvsa:access')->delay(now()->addMinutes(rand(0,3)));
 
             // Add each scrape task to queue
-        })->everyFiveMinutes();
+        })->everyTenMinutes()->emailOutputTo('danielmunn@outlook.com');
 
 //        Artisan::call('dvsa:access', ['--getslot'=>1, 'user'=>1]);
     }

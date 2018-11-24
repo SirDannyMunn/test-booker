@@ -26,6 +26,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('user/accept_booking', 'SlotController@accept');
+
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
