@@ -109,7 +109,6 @@ class DVSACheck extends Command
                 $this->window->clickLink(ucfirst($location->name));
                 $slots = $this->scrapeSlots($location->name);
                 $location->update(['last_checked' => now()->timestamp]);
-//                $this->handleData($all_slots[$location->name], $location);
                 $this->handleData($slots, $location);
                 $to_notify->push($this->getScores($slots, $location));
             }
@@ -136,16 +135,16 @@ class DVSACheck extends Command
     {
         $slots = [];
         $slots[$location] = [];
-        foreach (array_slice($this->window->elements('.SlotPicker-slot-label'), 10) as $element) {
-            /** @var $element RemoteWebElement */
+        foreach (array_slice($this->window->elements('.SlotPicker-slot-label'), 10) as $element) { /** @var $element RemoteWebElement */
             $string = $element->findElement(
                 WebDriverBy::className('SlotPicker-slot')
             )->getAttribute('data-datetime-label');
 
-            $date = Carbon::parse(substr($string, 0, strrpos($string, ' ')))->toDateString();
+            $slot = Carbon::parse($string)->toDateTimeString();
 
-            array_push($slots[$location], $date);
+            array_push($slots[$location], $slot);
         }
+
         return array_values($slots);
     }
 
@@ -162,7 +161,7 @@ class DVSACheck extends Command
         );
 
         $user_points = [];
-        foreach ($slots as $slot) {
+        foreach ($slots[0] as $slot) {
             $user_points[$slot] = [];
             foreach ($users as $user) {
                 $id = $user->id;

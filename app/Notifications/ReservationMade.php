@@ -41,7 +41,7 @@ class ReservationMade extends Notification
         $this->user = $user;
         $this->location = $data['location'];
         $this->date = Carbon::parse($data['date'])->format('d/m/y h:m');
-        $this->actionCode = str_random(10);
+        $this->actionCode = uniqid() . str_random(10);
 
         $this->user->action_code = $this->actionCode;
         $this->user->save();
