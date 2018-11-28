@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Location;
+use App\Notifications\ReservationMade;
 use App\User;
 use Carbon\Carbon;
 use Facebook\WebDriver\Remote\RemoteWebElement;
@@ -35,6 +36,9 @@ class DVSACheck extends Command
      */
     protected $browser;
 
+    /**
+     * @var
+     */
     protected $users;
 
     /**
@@ -65,10 +69,9 @@ class DVSACheck extends Command
         $this->users = User::all();
 
         $this->browser->browse(function ($browser) use ($data, $user, $locations) {
-        /**
-         * @var $browser \Tpccdaniel\DuskSecure\Browser
-        */
-
+            /**
+             * @var $browser \Tpccdaniel\DuskSecure\Browser
+             */
             $browser->deleteCookies();
 //
 //            $browser->visit('https://www.whoishostingthis.com/tools/user-agent//')->screenshot("ip ".now()->format('h.m.i'))->quit();
@@ -97,6 +100,7 @@ class DVSACheck extends Command
             $browser->pause(rand(0,1000));
 
 //            $all_slots = json_decode(file_get_contents(base_path('data/all_slots.json')), true);
+            $to_notify = collect();
             foreach ($locations as $location) {
                 // Breakage happening here
                 $browser->pause(rand(500,1500));
@@ -107,13 +111,98 @@ class DVSACheck extends Command
                 $browser->click('#test-centres-submit');
                 $browser->pause(rand(500,1500));
                 $browser->clickLink(ucfirst($location->name));
+                $location->update(['last_checked' => now()->timestamp]);
                 $slots = $this->scrapeSlots($browser);
 //                $this->handleData($all_slots[$location->name], $location);
                 $this->handleData($slots, $location);
+                $to_notify->push($this->getScores($slots, $location));
             }
+
+            $list = $to_notify->collapse()->groupBy('user.id');
 
             $browser->quit();
         });
+    }
+
+    /**
+     * @param $slots
+     * @param $location
+     * @return \Illuminate\Support\Collection
+     */
+    public function getScores($slots, $location)
+    {
+        $users = $location->users->sortByDesc('priority');
+        $slots = $this->removeSlotsAfter($slots,
+            Carbon::parse($users->pluck('test_date')->sort()->last())
+        );
+
+        $user_points = [];
+        foreach ($slots as $slot) {
+            $user_points[$slot] = [];
+            foreach ($users as $user) {
+                $id = $user->id;
+                $user_points[$slot][$id] = 0;
+                if (Carbon::parse($slot)->greaterThan($user->test_date))
+                    continue;
+                if ($user->location == $location->name)
+                    $user_points[$slot][$id] += 2;
+                if ($user->priority)
+                    $user_points[$slot][$id] += 1;
+            }
+        }
+
+        $eligible_candidates = $this->sliceEligibleCandidates($user_points);
+
+        $slots = $eligible_candidates->map(function ($ids, $date) use ($eligible_candidates, $location) {
+            $users = collect($ids)->filter()->sort()->map(function ($value, $key) {
+                return ['id' => $key, 'points' => $value];
+            })->values();
+
+            $item = ['date' => $date,
+                    'location' => $location->name,
+                    'user' => $users[$eligible_candidates->keys()->search($date)]];
+
+            return $item;
+        })->values();
+
+        return $slots;
+    }
+
+    /**
+     * @param $user_points
+     * @return \Illuminate\Support\Collection
+     */
+    public function sliceEligibleCandidates($user_points)
+    {
+        $eligible_candidates = array_where(array_first($user_points), function ($value) {
+            return $value != 0;
+        });
+
+        return collect(array_slice($user_points, 0, count($eligible_candidates)));
+    }
+
+    /**
+     * @param $slots
+     * @param $location
+     * @return array
+     */
+    public function handleData($slots, $location)
+    {
+
+//        $slots = $eligible_candidates->map(function ($names, $date) {
+//            return ['date' => $date, 'users' => collect($names)->filter()->sort()->map(function ($value, $key) {
+//                return ['id' => $key, 'points' => $value];
+//            })->values()];
+//        })->values();
+
+        // Send notifications
+//        foreach ($slots as $key => $slot) {
+//            $user = User::find($slot['users'][$key]['id']);
+//            $user->notify(new ReservationMade($user, $slot['date']));
+            // Also make event for 15 minutes to give check if taken, if not give to next best candidate
+//        }
+
+        return $slots;
     }
 
     /**
@@ -132,8 +221,8 @@ class DVSACheck extends Command
             $date = Carbon::parse(substr($string, 0, strrpos($string, ' ')))->toDateString();
             $time = substr($string, strrpos($string, ' '));
 
-            if(!isset($slots[$date])) {
-                $slots[$date] = ['date'=>$date,'times'=>[]];
+            if (!isset($slots[$date])) {
+                $slots[$date] = ['date' => $date, 'times' => []];
             }
 
             array_push($slots[$date]['times'], $time);
@@ -143,75 +232,15 @@ class DVSACheck extends Command
 
     /**
      * @param $slots
-     * @param $location
-     * @return array
-     */
-    public function handleData($slots, $location)
-    {
-        $users = $location->users->sortBy('created_at')->sortByDesc('priority');
-        $location->update(['last_checked' => now()->timestamp]);
-
-        // Get users date where latest
-        $latest_test_date = Carbon::parse($users->pluck('test_date')->sort()->last());
-        // Remove unneeded dates
-        $slots = $this->removeCrappySlots($slots, $latest_test_date);
-
-        // Inputs: Slots, Users
-        // Outputs: List of best suited users for slots based on:
-
-        // With data, check all users with that area to see if match available
-
-        $user_points = [];
-        foreach ($slots as $slot) {
-//            $slot = $slot['date'];
-            $user_points[$slot] = [];
-            foreach ($users as $user) {
-                $id = $user->id;
-                $user_points[$slot][$id] = 0;
-                if (Carbon::parse($slot)->greaterThan($user->test_date))
-                    continue;
-                if($user->location == $location->name)
-                    $user_points[$slot][$id]+=2;
-                if($user->priority)
-                    $user_points[$slot][$id]+=1;
-            }
-        }
-
-        $eligible_candidates = array_slice($user_points, 0,
-            count(array_where(array_first($user_points), function ($value) {
-                return $value != 0;
-            }))
-        );
-
-        $slots = array_map(function($names) {
-            return array_filter($names);
-        }, $eligible_candidates);
-
-        foreach ($slots as $slot => $users) {
-            $user_id = array_first(array_keys($slots[$slot]));
-        }
-
-        return $user_points;
-
-        // When match, send notification
-//        \Illuminate\Support\Facades\Auth::user()->notify(new \App\Notifications\ReservationMade(
-//            Auth::user(),
-//                // date
-//            ));
-        // Also make event for 15 minutes to give check if taken, if not give to next best candidate
-    }
-
-    /**
-     * @param $slots
      * @param $latest_test_date Carbon
      * @return array
      */
-    public function removeCrappySlots($slots, $latest_test_date)
+    public function removeSlotsAfter($slots, $latest_test_date)
     {
         // Loop though slots until get to the point then break and slice array with index
         foreach ($slots as $index => $slot) {
-            if($latest_test_date->lessThanOrEqualTo($slot)) {
-                return array_slice($slots,0, $index);
+            if ($latest_test_date->lessThanOrEqualTo($slot)) {
+                return array_slice($slots, 0, $index);
             }
         }
         return $slots;
