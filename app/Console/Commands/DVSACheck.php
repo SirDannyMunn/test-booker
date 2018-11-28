@@ -71,15 +71,7 @@ class DVSACheck extends Command
 
         $this->browser->browse(function ($browser) use ($data, $user, $locations) {
 
-        $browser->visit('http://www.whatsmyip.org/');
-        $browser->screenshot("ip ".now()->timestamp)->quit();
-        $browser->visit('https://www.whoishostingthis.com/tools/user-agent');
-        $browser->screenshot("ip ".now()->timestamp)->quit();
-        return;
-
             $this->window = $browser;
-
-//            $this->window->deleteCookies();
 
             // Login
             $this->window->visit('https://www.gov.uk/change-driving-test')

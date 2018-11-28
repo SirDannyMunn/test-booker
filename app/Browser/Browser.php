@@ -95,30 +95,14 @@ class Browser
      */
     protected function driver()
     {
-        $user_agents = [
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
-            'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
-            'Mozilla/5.0 (Windows NT 5.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
-            'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36',
-            'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36',
-            'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36',
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
-            'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
-        ];
-
-        $userAgent = $user_agents[rand(0, count($user_agents))];
         $options = $options = (new ChromeOptions)->addArguments([
             '--disable-gpu',
             '--headless',
             '--ignore-certificate-errors',
-            "--user-agent={$userAgent}"
         ]);
 
         $capabilities = DesiredCapabilities::chrome();
 
-//        $url = 'accb2a6ad600495b917187f2873558ec@proxy.crawlera.com:8010';
         $url = '127.0.0.1:8123';
         $proxy = ['proxyType' => 'manual', 'httpProxy' => $url];
         $capabilities->setCapability(WebDriverCapabilityType::PROXY, $proxy);
@@ -128,50 +112,5 @@ class Browser
         );
 
         return $driver;
-    }
-
-    public function connectProxy($details)
-    {
-        //        $options->setExperimentalOption("prefs", ["chrome.proxy" => [
-//            "value" => [
-//                "mode" => "fixed_servers",
-//                "rules" => [
-//                    "singleProxy" => [
-//                        "scheme" => "http",
-//                        "host" => "172.111.186.2",
-//                        "port" => 443
-//                    ],
-//                    "bypassList" => ["foobar.com"]
-//                ]
-//            ],
-//            "scope" => "regular"
-//        ]]);
-
-//        $pluginForProxyLogin = $this->connectProxy(['172.111.186.2', '443', 'purevpn0s7415434', 'p2yfiq7n']);
-//        $options->addExtensions([$pluginForProxyLogin]);
-
-//        $zip = new \ZipArchive();
-//        $plugin_path = base_path('App/Browser/Proxy');
-//        $pluginForProxyLogin = "{$plugin_path}/a".uniqid().".zip";
-//        $res = $zip->open($pluginForProxyLogin, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
-//        $zip->addFile("{$plugin_path}/manifest.json", 'manifest.json');
-//        $background = file_get_contents("{$plugin_path}/background.js");
-//        $background = str_replace(['%proxy_host', '%proxy_port', '%username', '%password'], $details, $background);
-//        $zip->addFromString('background.js', $background);
-//        $zip->close();
-//
-//        putenv("webdriver.chrome.driver=".base_path('chromedriver-linux'));
-
-//        $options = new ChromeOptions();
-//        $options->addExtensions([$pluginForProxyLogin]);
-//        $caps = DesiredCapabilities::chrome();
-//        $caps->setCapability(ChromeOptions::CAPABILITY, $options);
-//        $driver = ChromeDriver::start($caps);
-//        $driver->get('https://old-linux.com/ip/');
-//        header('Content-Type: image/png');
-//        echo $driver->takeScreenshot();
-//        unlink($pluginForProxyLogin);
-
-//        return $pluginForProxyLogin;
     }
 }
