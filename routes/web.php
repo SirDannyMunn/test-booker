@@ -2,6 +2,7 @@
 
 Route::get('/test', function () {
 
+//    return ;
      \Illuminate\Support\Facades\Artisan::call('dvsa:access');
 
 });

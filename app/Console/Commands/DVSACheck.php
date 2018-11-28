@@ -71,12 +71,17 @@ class DVSACheck extends Command
 
         $this->browser->browse(function ($browser) use ($data, $user, $locations) {
 
-        $browser->visit('https://www.whoishostingthis.com/tools/user-agent//')->screenshot("ip ".now()->format('h.m.i'))->quit();
+        $browser->visit('http://www.whatsmyip.org/');
+        $browser->screenshot("ip ".now()->timestamp)->quit();
+        $browser->visit('https://www.whoishostingthis.com/tools/user-agent');
+        $browser->screenshot("ip ".now()->timestamp)->quit();
+        return;
 
             $this->window = $browser;
 
-            $this->window->deleteCookies();
-//             Login
+//            $this->window->deleteCookies();
+
+            // Login
             $this->window->visit('https://www.gov.uk/change-driving-test')
                     ->clickLink('Start now')
                     ->type('#driving-licence-number', $data['username'])
@@ -85,11 +90,11 @@ class DVSACheck extends Command
 
             $this->window->pause(rand(0,1000));
 
-//             Handle captcha
+            // Handle captcha
             $captcha = $this->window->checkPresent('recaptcha_challenge_image');
             if ($captcha) {
                 // Do something
-                $this->window->screenshot("CAPTCHA-".now());
+                $this->window->screenshot("CAPTCHA-".now()->format('h.m.i'));
                 $this->line('FAILED - CAPTCHA FOUND');
             }
 
@@ -102,7 +107,6 @@ class DVSACheck extends Command
 //            $all_slots = json_decode(file_get_contents(base_path('data/all_slots.json')), true);
             $to_notify = collect();
             foreach ($locations as $location) {
-                // Breakage happening here
                 $this->window->pause(rand(250,1000));
                 $this->window->click('#change-test-centre');
                 $this->window->pause(rand(250,1000));

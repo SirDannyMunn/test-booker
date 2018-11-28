@@ -5,10 +5,7 @@ namespace App\Browser;
 use Closure;
 use Exception;
 use Facebook\WebDriver\Chrome\ChromeDriver;
-use Facebook\WebDriver\Firefox\FirefoxProfile;
-use Facebook\WebDriver\Remote\WebDriverBrowserType;
 use Facebook\WebDriver\Remote\WebDriverCapabilityType;
-use Facebook\WebDriver\WebDriverPlatform;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 use Tpccdaniel\DuskSecure\Browser as DuskBrowser;
@@ -99,7 +96,6 @@ class Browser
     protected function driver()
     {
         $user_agents = [
-            #Chrome
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
             'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
             'Mozilla/5.0 (Windows NT 5.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
@@ -116,14 +112,15 @@ class Browser
         $options = $options = (new ChromeOptions)->addArguments([
             '--disable-gpu',
             '--headless',
+            '--ignore-certificate-errors',
             "--user-agent={$userAgent}"
         ]);
 
         $capabilities = DesiredCapabilities::chrome();
 
-        $ip = '212.139.190.90';
-        $port = '32228';
-        $proxy = ['proxyType' => 'manual', 'httpProxy' => "{$ip}:{$port}", 'sslProxy' => "{$ip}:{$port}"];
+//        $url = 'accb2a6ad600495b917187f2873558ec@proxy.crawlera.com:8010';
+        $url = '127.0.0.1:8123';
+        $proxy = ['proxyType' => 'manual', 'httpProxy' => $url];
         $capabilities->setCapability(WebDriverCapabilityType::PROXY, $proxy);
         $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
         $driver = RemoteWebDriver::create(
