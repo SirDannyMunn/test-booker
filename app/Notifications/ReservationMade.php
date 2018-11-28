@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\NexmoMessage;
@@ -12,9 +13,22 @@ class ReservationMade extends Notification
 {
     use Queueable;
 
+    /**
+     * @var User
+     */
     protected $user;
+    /**
+     * @var string
+     */
     protected $date;
+    /**
+     * @var
+     */
     protected $location;
+    /**
+     * @var string
+     */
+    protected $actionCode;
 
     /**
      * Create a new notification instance.
@@ -27,6 +41,10 @@ class ReservationMade extends Notification
         $this->user = $user;
         $this->location = $data['location'];
         $this->date = Carbon::parse($data['date'])->format('d/m/y h:m');
+        $this->actionCode = str_random(10);
+
+        $this->user->action_code = $this->actionCode;
+        $this->user->save();
     }
 
     /**
@@ -72,7 +90,7 @@ class ReservationMade extends Notification
                 ->line("We have a test available at {$this->date} at {$this->location} test centre")
                 ->line("If you would like this date, please click the button below.
                  Otherwise, ignore this message and we will send you another date when one comes up.")
-                ->action('Book', url('/'))
+                ->action('Book', url("user/accept_booking?user={$this->actionCode}"))
                 ->line('Thank you for using our service!');
     }
 

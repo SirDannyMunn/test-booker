@@ -35,11 +35,12 @@ class DVSACheck extends Command
      * @var \Tpccdaniel\DuskSecure\Browser
      */
     protected $browser;
+    protected $users;
 
     /**
-     * @var
+     * @var \Tpccdaniel\DuskSecure\Browser
      */
-    protected $users;
+    protected $window;
 
     /**
      * Create a new command instance.
@@ -69,59 +70,87 @@ class DVSACheck extends Command
         $this->users = User::all();
 
         $this->browser->browse(function ($browser) use ($data, $user, $locations) {
-            /**
-             * @var $browser \Tpccdaniel\DuskSecure\Browser
-             */
-            $browser->deleteCookies();
-//
-//            $browser->visit('https://www.whoishostingthis.com/tools/user-agent//')->screenshot("ip ".now()->format('h.m.i'))->quit();
-//            return;
-            // Login
-            $browser->visit('https://www.gov.uk/change-driving-test')
+
+        $browser->visit('https://www.whoishostingthis.com/tools/user-agent//')->screenshot("ip ".now()->format('h.m.i'))->quit();
+
+            $this->window = $browser;
+
+            $this->window->deleteCookies();
+//             Login
+            $this->window->visit('https://www.gov.uk/change-driving-test')
                     ->clickLink('Start now')
                     ->type('#driving-licence-number', $data['username'])
                     ->type('#application-reference-number', $data['password'])
                     ->click('#booking-login');
 
-            $browser->pause(rand(0,1000));
+            $this->window->pause(rand(0,1000));
 
-            // Handle captcha
-            $captcha = $browser->checkPresent('recaptcha_challenge_image');
+//             Handle captcha
+            $captcha = $this->window->checkPresent('recaptcha_challenge_image');
             if ($captcha) {
                 // Do something
-                $browser->screenshot("CAPTCHA-".now());
-                $browser->tinker();
+                $this->window->screenshot("CAPTCHA-".now());
+                $this->line('FAILED - CAPTCHA FOUND');
             }
 
-            $browser->click('#date-time-change');
-            $browser->click('#test-choice-earliest');
-            $browser->pause(rand(0,1000));
-            $browser->click('#driving-licence-submit');
-            $browser->pause(rand(0,1000));
+            $this->window->click('#date-time-change');
+            $this->window->click('#test-choice-earliest');
+            $this->window->pause(rand(0,1000));
+            $this->window->click('#driving-licence-submit');
+            $this->window->pause(rand(0,1000));
 
 //            $all_slots = json_decode(file_get_contents(base_path('data/all_slots.json')), true);
             $to_notify = collect();
             foreach ($locations as $location) {
                 // Breakage happening here
-                $browser->pause(rand(500,1500));
-                $browser->click('#change-test-centre');
-                $browser->pause(rand(500,1500));
-                $browser->type('#test-centres-input', $location->name);
-                $browser->pause(rand(500,1500));
-                $browser->click('#test-centres-submit');
-                $browser->pause(rand(500,1500));
-                $browser->clickLink(ucfirst($location->name));
+                $this->window->pause(rand(250,1000));
+                $this->window->click('#change-test-centre');
+                $this->window->pause(rand(250,1000));
+                $this->window->type('#test-centres-input', $location->name);
+                $this->window->pause(rand(250,1000));
+                $this->window->click('#test-centres-submit');
+                $this->window->pause(rand(250,1000));
+                $this->window->clickLink(ucfirst($location->name));
+                $slots = $this->scrapeSlots($location->name);
                 $location->update(['last_checked' => now()->timestamp]);
-                $slots = $this->scrapeSlots($browser);
 //                $this->handleData($all_slots[$location->name], $location);
                 $this->handleData($slots, $location);
                 $to_notify->push($this->getScores($slots, $location));
             }
 
+            $this->line('Sending emails...');
+
             $list = $to_notify->collapse()->groupBy('user.id');
 
-            $browser->quit();
+            foreach ($list as $item) {
+                $item = $item->sortByDesc('date')->sortByDesc('user.points')[0];
+                $user = $this->users->find($item['user']['id']);
+                $user->notify(new ReservationMade($user, $item));
+            }
+
+            $this->window->quit();
         });
+    }
+
+    /**
+     * @param $location
+     * @return array
+     */
+    public function scrapeSlots($location)
+    {
+        $slots = [];
+        $slots[$location] = [];
+        foreach (array_slice($this->window->elements('.SlotPicker-slot-label'), 10) as $element) {
+            /** @var $element RemoteWebElement */
+            $string = $element->findElement(
+                WebDriverBy::className('SlotPicker-slot')
+            )->getAttribute('data-datetime-label');
+
+            $date = Carbon::parse(substr($string, 0, strrpos($string, ' ')))->toDateString();
+
+            array_push($slots[$location], $date);
+        }
+        return array_values($slots);
     }
 
     /**
@@ -149,6 +178,11 @@ class DVSACheck extends Command
                 if ($user->priority)
                     $user_points[$slot][$id] += 1;
             }
+        }
+
+        if (!$user_points) {
+            $this->window->quit();
+            return null;
         }
 
         $eligible_candidates = $this->sliceEligibleCandidates($user_points);
@@ -203,31 +237,6 @@ class DVSACheck extends Command
 //        }
 
         return $slots;
-    }
-
-    /**
-     * @param $browser \Tpccdaniel\DuskSecure\Browser
-     * @return array
-     */
-    public function scrapeSlots($browser)
-    {
-        $slots = [];
-        foreach (array_slice($browser->elements('.SlotPicker-slot-label'), 10) as $element) {
-            /** @var $element RemoteWebElement */
-            $string = $element->findElement(
-                WebDriverBy::className('SlotPicker-slot')
-            )->getAttribute('data-datetime-label');
-
-            $date = Carbon::parse(substr($string, 0, strrpos($string, ' ')))->toDateString();
-            $time = substr($string, strrpos($string, ' '));
-
-            if (!isset($slots[$date])) {
-                $slots[$date] = ['date' => $date, 'times' => []];
-            }
-
-            array_push($slots[$date]['times'], $time);
-        }
-        return array_values($slots);
     }
 
     /**

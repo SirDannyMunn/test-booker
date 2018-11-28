@@ -21,7 +21,8 @@ class CreateUsersTable extends Migration
             $table->boolean('booked')->default(false);
             $table->string('location');
             $table->timestamp('test_date');
-            $table->string('prefered_date');
+            $table->string('preferred_date');
+            $table->string('action_code')->default('Not Set');
             $table->string('dl_number');
             $table->string('ref_number');
             $table->string('email')->unique();
