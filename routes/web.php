@@ -3,7 +3,6 @@
 Route::get('/test', function () {
 
     // \Illuminate\Support\Facades\Artisan::call('dvsa:access');
-    return 'test';
 
 //    Auth::user()->notify(new \App\Notifications\ReservationMade(
 //        Auth::user(),
@@ -18,7 +17,9 @@ Route::get('/test', function () {
 
 //    return $best_users = (new App\User)->getBest($users, $locations);
 
-//    \Illuminate\Support\Facades\Artisan::call('dvsa:access');
+//    return 'test';
+
+    \Illuminate\Support\Facades\Artisan::call('dvsa:access');
 
 });
 
