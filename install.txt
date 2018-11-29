@@ -1,0 +1,4 @@
+sudo apt-get install polipo
+
+sudo ln -s /etc/polipo/config /home/vagrant/Dev/laravel-web-crawler/polipo
+
