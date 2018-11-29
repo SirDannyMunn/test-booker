@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Http\Controllers\DVSAController;
+use App\Jobs\ScrapeDVSA;
 use App\Location;
 use App\User;
 use Illuminate\Console\Scheduling\Schedule;
@@ -29,20 +30,26 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->call(function() {
-            $users = User::where('booked', false)->with(['locations' => function($location) {
-                return $location->where('last_checked', '<', now()->subMinutes(5)->timestamp);
-            }])->get();
-
-            // Get best users to use for scraping - ensuring to include all locations.
-            $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
-            $best_users = (new User)->getBest($users, $locations);
+//            $users = User::where('booked', false)->with(['locations' => function($location) {
+//                return $location->where('last_checked', '<', now()->subMinutes(5)->timestamp);
+//            }])->get();
+//
+//            // Get best users to use for scraping - ensuring to include all locations.
+//            $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
+//            $best_users = (new User)->getBest($users, $locations);
 
             // Split into groups of ten, send each to process, ensure only ten running at a time
-
             // Add each scrape task to queue
-            Artisan::call('dvsa:access');
+//            \Log::info('test');
 
-        })->everyTenMinutes();
+
+            for ($i = 0; $i < 50; $i++) {
+                ScrapeDVSA::dispatch($i);
+            }
+
+//                Artisan::call('dvsa:access');
+
+        })->everyMinute();
     }
 
     /**
