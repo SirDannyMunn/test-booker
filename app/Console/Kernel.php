@@ -29,25 +29,27 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('horizon:snapshot')->everyMinute();
         $schedule->call(function() {
-//            $users = User::where('booked', false)->with(['locations' => function($location) {
-//                return $location->where('last_checked', '<', now()->subMinutes(5)->timestamp);
-//            }])->get();
+            $users = User::where('booked', false)->with(['locations' => function($location) {
+                return $location->where('last_checked', '<', now()->subMinutes(5)->timestamp);
+            }])->get();
 //
 //            // Get best users to use for scraping - ensuring to include all locations.
-//            $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
-//            $best_users = (new User)->getBest($users, $locations);
+            $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
+            $best_users = (new User)->getBest($users, $locations);
+
+
+            file_put_contents(storage_path('logs/laravel-2018-11-29.log'),'');
+            $random = str_random(3);
 
             // Split into groups of ten, send each to process, ensure only ten running at a time
             // Add each scrape task to queue
-//            \Log::info('test');
+            for ($i = 0; $i < 20; $i++) {
+//                \Log::info('wtf');
 
-
-            for ($i = 0; $i < 50; $i++) {
-                ScrapeDVSA::dispatch($i);
+                ScrapeDVSA::dispatch($i, $random)->onConnection('redis');
             }
-
-//                Artisan::call('dvsa:access');
 
         })->everyMinute();
     }

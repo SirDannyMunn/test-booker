@@ -15,31 +15,33 @@ class ScrapeDVSA implements ShouldQueue
 
     public $tries = 3;
     public $timeout = 240;
-
-    public $i;
+    private $i;
+    private $random;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($i)
+    public function __construct($i, $random)
     {
         $this->i = $i;
-
+        $this->random = $random;
     }
 
     /**
      * Execute the job.
      *
      * @return void
+     * @throws \Illuminate\Contracts\Redis\LimiterTimeoutException
      */
     public function handle()
     {
-        Redis::funnel('ScrapeDVSA')->limit(10)->then(function () {
+        Redis::connection('default')->funnel('ScrapeDVSA')->limit(10)->then(function () {
 
-            \Log::info($this->i);
-            sleep(10);
+//            \Log::info($this->i ." - ". now()->toTimeString() ." - ". $this->random);
+
+            sleep(5);
 
         }, function () {
 
