@@ -4,7 +4,6 @@ namespace App\Browser;
 
 use Closure;
 use Exception;
-use Facebook\WebDriver\Chrome\ChromeDriver;
 use Facebook\WebDriver\Remote\WebDriverCapabilityType;
 use Illuminate\Support\Facades\Log;
 use Throwable;

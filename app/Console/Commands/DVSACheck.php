@@ -35,12 +35,13 @@ class DVSACheck extends Command
      * @var \Tpccdaniel\DuskSecure\Browser
      */
     protected $browser;
-    protected $users;
 
     /**
      * @var \Tpccdaniel\DuskSecure\Browser
      */
     protected $window;
+
+    protected $users;
 
     /**
      * Create a new command instance.
@@ -80,7 +81,7 @@ class DVSACheck extends Command
                     ->type('#application-reference-number', $data['password'])
                     ->click('#booking-login');
 
-            $this->window->pause(rand(0,1000));
+            $this->window->pause(rand(250, 1000));
 
             // Handle captcha
             $captcha = $this->window->checkPresent('recaptcha_challenge_image');
@@ -92,9 +93,9 @@ class DVSACheck extends Command
 
             $this->window->click('#date-time-change');
             $this->window->click('#test-choice-earliest');
-            $this->window->pause(rand(0,1000));
+            $this->window->pause(rand(250, 1000));
             $this->window->click('#driving-licence-submit');
-            $this->window->pause(rand(0,1000));
+            $this->window->pause(rand(250, 1000));
 
 //            $all_slots = json_decode(file_get_contents(base_path('data/all_slots.json')), true);
             $to_notify = collect();

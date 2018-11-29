@@ -23,13 +23,13 @@ class CreateUsersTable extends Migration
             $table->timestamp('test_date');
             $table->string('preferred_date');
             $table->string('action_code')->default('not_set');
+//            $table->string('dl_number')->unique();
+//            $table->string('ref_number')->unique();
+            // TODO - Make unique in prod
             $table->string('dl_number');
             $table->string('ref_number');
             $table->string('email')->unique();
             $table->string('phone_number')->unique();
-            // Make unique in prod
-//            $table->string('dl_number')->unique();
-//            $table->string('ref_number')->unique();
             $table->enum('contact_preference', ['sms', 'email']);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
