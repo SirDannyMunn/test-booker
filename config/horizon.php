@@ -93,7 +93,8 @@ return [
     | Queue Worker Configuration
     |--------------------------------------------------------------------------
     |
-    | Here you may define the queue worker settings used by your application
+    | Here you may define the que
+    ue worker settings used by your application
     | in all environments. These supervisors and settings handle all your
     | queued jobs and will be provisioned by Horizon during deployment.
     |

@@ -39,18 +39,14 @@ class Kernel extends ConsoleKernel
             $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
             $best_users = (new User)->getBest($users, $locations);
 
-
-            file_put_contents(storage_path('logs/laravel-2018-11-29.log'),'');
+//            file_put_contents(storage_path('logs/laravel-2018-11-29.log'),'');
             $random = str_random(3);
 
             // Split into groups of ten, send each to process, ensure only ten running at a time
             // Add each scrape task to queue
             for ($i = 0; $i < 20; $i++) {
-//                \Log::info('wtf');
-
                 ScrapeDVSA::dispatch($i, $random)->onConnection('redis');
             }
-
         })->everyMinute();
     }
 

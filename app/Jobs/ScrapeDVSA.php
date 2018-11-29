@@ -27,6 +27,8 @@ class ScrapeDVSA implements ShouldQueue
     {
         $this->i = $i;
         $this->random = $random;
+
+//        $this->handle();
     }
 
     /**
@@ -37,9 +39,10 @@ class ScrapeDVSA implements ShouldQueue
      */
     public function handle()
     {
-        Redis::connection('default')->funnel('ScrapeDVSA')->limit(10)->then(function () {
+//        \Log::info('handling');
+        Redis::funnel('ScrapeDVSA')->limit(10)->then(function () {
 
-//            \Log::info($this->i ." - ". now()->toTimeString() ." - ". $this->random);
+            \Log::info($this->i ." - ". now()->toTimeString() ." - ". $this->random);
 
             sleep(5);
 
