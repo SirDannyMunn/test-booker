@@ -34,19 +34,15 @@ class Kernel extends ConsoleKernel
             }])->get();
 
             // Get best users to use for scraping - ensuring to include all locations.
-//            $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
-//            $best_users = (new User)->getBest($users, $locations);
+            $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
+            $best_users = (new User)->getBest($users, $locations);
 
-            // send to process with delay if necessary.
-//            (new DVSAController)->access();
-                Artisan::call('dvsa:access');
-
-//            Artisan::queue('dvsa:access')->delay(now()->addMinutes(rand(0,3)));
+            // Split into groups of ten, send each to process, ensure only ten running at a time
 
             // Add each scrape task to queue
-        })->everyTenMinutes()->emailOutputTo('danielmunn@outlook.com');
+            Artisan::call('dvsa:access');
 
-//        Artisan::call('dvsa:access', ['--getslot'=>1, 'user'=>1]);
+        })->everyTenMinutes();
     }
 
     /**

@@ -91,26 +91,26 @@ class DVSACheck extends Command
                 $this->line('FAILED - CAPTCHA FOUND');
             }
 
-            $this->window->click('#date-time-change');
-            $this->window->click('#test-choice-earliest');
-            $this->window->pause(rand(250, 1000));
-            $this->window->click('#driving-licence-submit');
-            $this->window->pause(rand(250, 1000));
+            $this->window->click('#date-time-change')
+                         ->click('#test-choice-earliest')
+                         ->pause(rand(250, 1000))
+                         ->click('#driving-licence-submit')
+                         ->pause(rand(250, 1000));
 
 //            $all_slots = json_decode(file_get_contents(base_path('data/all_slots.json')), true);
             $to_notify = collect();
             foreach ($locations as $location) {
-                $this->window->pause(rand(250,1000));
-                $this->window->click('#change-test-centre');
-                $this->window->pause(rand(250,1000));
-                $this->window->type('#test-centres-input', $location->name);
-                $this->window->pause(rand(250,1000));
-                $this->window->click('#test-centres-submit');
-                $this->window->pause(rand(250,1000));
-                $this->window->clickLink(ucfirst($location->name));
+                $this->window->pause(rand(250,1000))
+                             ->click('#change-test-centre')
+                             ->pause(rand(250,1000))
+                             ->type('#test-centres-input', $location->name)
+                             ->pause(rand(250,1000))
+                             ->click('#test-centres-submit')
+                             ->pause(rand(250,1000))
+                             ->clickLink(ucfirst($location->name));
+
                 $slots = $this->scrapeSlots($location->name);
                 $location->update(['last_checked' => now()->timestamp]);
-                $this->handleData($slots, $location);
                 $to_notify->push($this->getScores($slots, $location));
             }
 
