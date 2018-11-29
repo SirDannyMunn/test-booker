@@ -212,30 +212,6 @@ class DVSACheck extends Command
 
     /**
      * @param $slots
-     * @param $location
-     * @return array
-     */
-    public function handleData($slots, $location)
-    {
-
-//        $slots = $eligible_candidates->map(function ($names, $date) {
-//            return ['date' => $date, 'users' => collect($names)->filter()->sort()->map(function ($value, $key) {
-//                return ['id' => $key, 'points' => $value];
-//            })->values()];
-//        })->values();
-
-        // Send notifications
-//        foreach ($slots as $key => $slot) {
-//            $user = User::find($slot['users'][$key]['id']);
-//            $user->notify(new ReservationMade($user, $slot['date']));
-            // Also make event for 15 minutes to give check if taken, if not give to next best candidate
-//        }
-
-        return $slots;
-    }
-
-    /**
-     * @param $slots
      * @param $latest_test_date Carbon
      * @return array
      */
