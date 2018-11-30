@@ -18,15 +18,15 @@ class ReservationMade extends Notification
     protected $location;
     protected $actionCode;
 
-
-    public function __construct($user, $data)
+    public function __construct($user, $slot)
     {
         $this->user = $user;
-        $this->location = $data['location'];
-        $this->date = Carbon::parse($data['date'])->format('d/m/y h:m');
+        $this->location = $slot['location'];
+        $this->date = Carbon::parse($slot['date'])->format('d/m/y h:m');
         $this->actionCode = uniqid() . str_random(10);
 
         $this->user->action_code = $this->actionCode;
+//        $this->user->update(['action_code' => $this->actionCode]);
         $this->user->save();
     }
 

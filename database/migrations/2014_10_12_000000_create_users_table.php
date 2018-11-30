@@ -20,7 +20,7 @@ class CreateUsersTable extends Migration
             $table->boolean('priority');
             $table->boolean('booked')->default(false);
             $table->string('location');
-            $table->timestamp('test_date');
+            $table->dateTime('test_date');
             $table->string('preferred_date');
             $table->string('action_code')->default('not_set');
 //            $table->string('dl_number')->unique();

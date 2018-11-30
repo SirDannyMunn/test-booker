@@ -5,6 +5,10 @@ Route::get('/test', function () {
 //    \App\Jobs\ScrapeDVSA::dispatch(\App\User::find(5), '232342');
 //
 
+    (new \App\Jobs\ScrapeDVSA(\App\User::find(7), 'dasddas'))->handle();
+
+//    \App\User::find(7)->notify(new \App\Notifications\ReservationMade(\App\User::find(7), ['date' => '12:01:12', 'location' => 'skippers']));
+
     return \Illuminate\Support\Facades\Redis::connection('default')->dbsize();
 
     $users = \App\User::where('booked', false)
