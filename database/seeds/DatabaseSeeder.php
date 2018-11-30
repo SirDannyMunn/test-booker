@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
             $locations->push(factory(App\Location::class)->create(['name' => $place]));
         }
 
-        for($i=0; $i<10; $i++) {
+        for($i=0; $i<rand(1, 10); $i++) {
 
             $user_locations = $locations->random(rand(1,5));
 

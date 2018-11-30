@@ -2,3 +2,10 @@ sudo apt-get install polipo
 
 sudo ln -s /etc/polipo/config /home/vagrant/Dev/laravel-web-crawler/polipo
 
+# Add cron task
+# crontab -e
+# * * * * * cd /home/vagrant/Dev/laravel-web-crawler && php artisan schedule:run >> /dev/null 2>&1
+
+php artisan config:clear
+php artisan config:cache
+php artisan horizon

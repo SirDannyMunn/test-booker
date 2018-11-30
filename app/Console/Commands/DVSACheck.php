@@ -53,6 +53,10 @@ class DVSACheck extends Command
         parent::__construct();
 
         $this->browser = $browser;
+
+        $test = new Browser;
+
+        return 'test';
     }
 
     /**

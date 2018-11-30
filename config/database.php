@@ -4,6 +4,7 @@ return [
 
     'default' => env('DB_CONNECTION', 'mysql'),
 
+    // Database connections
     'connections' => [
         'mysql' => [
             'driver' => 'mysql',
@@ -20,9 +21,10 @@ return [
             'strict' => true,
             'engine' => null,
         ],
+
         'redis' => [
             'driver' => 'redis',
-            'connection' => 'default',
+            'connection' => 'redis',
             'queue' => '{default}',
             'retry_after' => 90,
             'block_for' => 5,
@@ -31,6 +33,7 @@ return [
 
     'migrations' => 'migrations',
 
+    // Specific redis connections
     'redis' => [
 
         'client' => 'predis',

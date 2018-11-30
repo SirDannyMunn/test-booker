@@ -2,13 +2,11 @@
 
 namespace App\Console;
 
-use App\Http\Controllers\DVSAController;
 use App\Jobs\ScrapeDVSA;
-use App\Location;
 use App\User;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
@@ -30,24 +28,37 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('horizon:snapshot')->everyMinute();
-        $schedule->call(function() {
-            $users = User::where('booked', false)->with(['locations' => function($location) {
-                return $location->where('last_checked', '<', now()->subMinutes(5)->timestamp);
-            }])->get();
-//
-//            // Get best users to use for scraping - ensuring to include all locations.
+
+        $users = User::where('booked', false)
+        ->whereDate('test_date', '>', now()->endOfDay()->addWeekdays(3))
+        ->get();
+
+        if (!filled($users)) {
+            Log::notice('No Users - '.now()->toDateTimeString());
+            return;
+        }
+
+        // allowed visits per hour split between people and limited to >= 1
+        $frequency = round( 60 / (315 / count($users) ) - 0.499 ) ?: 1;
+
+        $users->load(['locations' => function($location) use ($frequency) {
+            return $location->where('last_checked', '<', now()->subMinutes($frequency)->timestamp);
+        }]);
+
+        $schedule->call(function() use ($users) {
             $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
             $best_users = (new User)->getBest($users, $locations);
 
-//            file_put_contents(storage_path('logs/laravel-2018-11-29.log'),'');
             $random = str_random(3);
 
-            // Split into groups of ten, send each to process, ensure only ten running at a time
-            // Add each scrape task to queue
-            for ($i = 0; $i < 20; $i++) {
-                ScrapeDVSA::dispatch($i, $random)->onConnection('redis');
+            \Log::info('Starting :' . $random);
+            \Log::info($best_users);
+
+            foreach ($best_users as $user) {
+                ScrapeDVSA::dispatch($user, $random)->onConnection('redis');
             }
-        })->everyMinute();
+        })->cron("*/{$frequency} * * * *");
+//          ->unlessBetween('23:00', '6:00');
     }
 
     /**

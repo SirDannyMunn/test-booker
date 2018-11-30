@@ -54,23 +54,23 @@ class User extends Authenticatable
     public function getBest($users, $locations) {
         $best_users = collect();
         while (filled($locations)) {
-            $location_points = [];
+            $location_points = collect();
             foreach ($users as $user) {
-                $location_points[$user->name] = 0;
+                $location_points[$user->id] = collect(['points' => 0, 'user' => $user]);
                 foreach ($user->locations as $location) {
                     // Check each user against remaining locations
                     if ($locations->has($location->name)) {
                         // If user has one of locations, give point
-                        $location_points[$user->name]+=1;
+                        $location_points[$user->id]['points']+=1;
                     }
                 }
             }
-            // Collect user with most points
-            $sorted = array_keys(array_sort($location_points));
-            $best_user = end($sorted);
-            $best_users->push($best_user);
+            // Sort to get most points
+            $sorted = $location_points->sortBy('points');
+            $best_user = $sorted->keys()->last();
+            $best_users->push($sorted->last()['user']);
             // Remove user and all user's locations from lists
-            $best_user = $users->where('name', $best_user)->first();
+            $best_user = $users->find($best_user);
             $users->forget($users->search($best_user));
             $locations->forget($best_user->locations->pluck('name')->toArray());
         }
