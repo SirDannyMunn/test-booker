@@ -97,13 +97,13 @@ class Browser
         $options = $options = (new ChromeOptions)->addArguments([
             '--disable-gpu',
             '--headless',
-            '--ignore-certificate-errors',
+//            '--ignore-certificate-errors',
         ]);
 
         $capabilities = DesiredCapabilities::chrome();
 
-        $url = '127.0.0.1:8123';
-        $proxy = ['proxyType' => 'manual', 'httpProxy' => $url];
+        $url = 'localhost:8123';
+        $proxy = ['proxyType' => 'manual', 'httpProxy' => $url, 'sslProxy' => $url];
         $capabilities->setCapability(WebDriverCapabilityType::PROXY, $proxy);
         $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
         $driver = RemoteWebDriver::create(

@@ -1,10 +1,22 @@
 sudo apt-get install polipo
 
+# configure polipo
+# nano  /etc/polipo/config
+# restart polipo
+# sudo /etc/init.d/polipo restart
+
 sudo ln -s /etc/polipo/config /home/vagrant/Dev/laravel-web-crawler/polipo
 
 # Add cron task
 # crontab -e
 # * * * * * cd /home/vagrant/Dev/laravel-web-crawler && php artisan schedule:run >> /dev/null 2>&1
+
+# for CA management
+# sudo apt install libnss3-tools
+# sudo mkdir /usr/local/share/ca-certificates/extra
+# sudo cp crawlera-ca.crt /usr/local/share/ca-certificates/extra/crawlera-ca.crt
+# sudo update-ca-certificates
+# sudo cp install-ca /usr/local/bin
 
 php artisan config:clear
 php artisan config:cache

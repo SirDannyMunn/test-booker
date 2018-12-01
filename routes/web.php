@@ -32,12 +32,9 @@ Route::get('/test', function () {
 //    ->whereDate('test_date', '>', now()->endOfDay()->addWeekdays(3))
 //    ->get();
 
-
     return $users = \App\User::where('booked', false)->whereDate('test_date', '>' , now()->addWeekdays(3))->with(['locations' => function($location) {
         return $location->where('last_checked', '<', now()->timestamp);
     }])->get();
-
-
 
 //    $browser = new
 

@@ -26,7 +26,6 @@ class ReservationMade extends Notification
         $this->actionCode = uniqid() . str_random(10);
 
         $this->user->action_code = $this->actionCode;
-//        $this->user->update(['action_code' => $this->actionCode]);
         $this->user->save();
     }
 

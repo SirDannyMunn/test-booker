@@ -50,34 +50,34 @@ class ScrapeDVSA implements ShouldQueue
 
             \Log::info($this->user ." - ". now()->toTimeString() ." - ". $this->random);
 
-//            (new Browser)->browse(function ($window) {
+            (new Browser)->browse(function ($window) {
 
-//                $this->window = $window;
-//
-//                $this->login();
-//
-//                \Log::info('logged in');
-//
-//                $this->checkCaptcha();
-//
-//                $this->goToCalendar();
+                $this->window = $window;
+
+                $this->login();
+
+                \Log::info('logged in');
+
+                $this->checkCaptcha();
+
+                $this->goToCalendar();
 
                 \Log::info('at calendar');
 
-                $all_slots = json_decode(file_get_contents(base_path('data/all_slots.json')), true);
+//                $all_slots = json_decode(file_get_contents(base_path('data/all_slots.json')), true);
                 $to_notify = collect();
                 foreach ($this->user->locations as $location) {
-//                    $this->window->pause(rand(250,1000))
-//                        ->click('#change-test-centre')
-//                        ->pause(rand(250,1000))
-//                        ->type('#test-centres-input', $location->name)
-//                        ->pause(rand(250,1000))
-//                        ->click('#test-centres-submit')
-//                        ->pause(rand(250,1000))
-//                        ->clickLink(ucfirst($location->name));
+                    $this->window->pause(rand(250,1000))
+                        ->click('#change-test-centre')
+                        ->pause(rand(250,1000))
+                        ->type('#test-centres-input', $location->name)
+                        ->pause(rand(250,1000))
+                        ->click('#test-centres-submit')
+                        ->pause(rand(250,1000))
+                        ->clickLink(ucfirst($location->name));
 
-//                    $slots = $this->scrapeSlots($location->name);
-                    $slots = $all_slots[$location->name];
+                    $slots = $this->scrapeSlots($location->name);
+//                    $slots = $all_slots[$location->name];
                     $location->update(['last_checked' => now()->timestamp]);
                     $to_notify->push($this->getScores($slots, $location));
                 }
@@ -88,9 +88,8 @@ class ScrapeDVSA implements ShouldQueue
 
                 $this->sendNotifications($to_notify);
 
-//                $this->window->quit();
-//            });
-
+                $this->window->quit();
+            });
         }, function () {
 
             \Log::info('Releasing');
@@ -106,7 +105,7 @@ class ScrapeDVSA implements ShouldQueue
     {
         $slots = [];
         $slots[$location] = [];
-        foreach (array_slice($this->window->elements('.SlotPicker-slot-label'), 10) as $element) { /** @var $element RemoteWebElement */
+        foreach (array_slice($this->window->elements('.SlotPicker-slot-label'), 0, 20) as $element) { /** @var $element RemoteWebElement */
             $string = $element->findElement(
                 WebDriverBy::className('SlotPicker-slot')
             )->getAttribute('data-datetime-label');
@@ -181,7 +180,7 @@ class ScrapeDVSA implements ShouldQueue
         );
 
         $user_points = [];
-        foreach ($slots as $slot) {
+        foreach ($slots[0] as $slot) {
             $user_points[$slot] = [];
             foreach ($users as $user) {
                 $id = $user->id;
@@ -196,7 +195,7 @@ class ScrapeDVSA implements ShouldQueue
         }
 
         if (!$user_points) {
-//            $this->window->quit();
+            $this->window->quit();
             return collect();
         }
 
