@@ -13,10 +13,11 @@ sudo ln -s /etc/polipo/config /home/vagrant/Dev/laravel-web-crawler/polipo
 
 # for CA management
 # sudo apt install libnss3-tools
-# sudo mkdir /usr/local/share/ca-certificates/extra
-# sudo cp crawlera-ca.crt /usr/local/share/ca-certificates/extra/crawlera-ca.crt
-# sudo update-ca-certificates
-# sudo cp install-ca /usr/local/bin
+# sudo certutil -d sql:$HOME/.pki/nssdb -A -n 'Crawlera CA' -i crawlera-ca.crt -t TCP,TCP,TCP
+# (For server) sudo certutil -d sql:$HOME/.pki/nssdb -A -n 'Crawlera CA' -i crawlera-ca.crt -t P,P,P
+# Check CA store
+# certutil -L -d sql:${HOME}/.pki/nssdb
+# >> Crawlera CA                                                  CT,C,C
 
 php artisan config:clear
 php artisan config:cache
