@@ -57,7 +57,9 @@ class Kernel extends ConsoleKernel
             foreach ($best_users as $user) {
                 ScrapeDVSA::dispatch($user, $random)->onConnection('redis');
             }
-        })->cron("*/{$frequency} * * * *");
+        })->cron("*/{$frequency} * * * *")
+            ->name('DVSA')
+            ->withoutOverlapping();
 //          ->unlessBetween('23:00', '6:00');
     }
 

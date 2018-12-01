@@ -97,7 +97,7 @@ class Browser
         $options = $options = (new ChromeOptions)->addArguments([
             '--disable-gpu',
             '--headless',
-//            '--ignore-certificate-errors',
+            '--ignore-certificate-errors',
         ]);
 
         $capabilities = DesiredCapabilities::chrome();

@@ -38,7 +38,11 @@ class FlushRedis extends Command
      */
     public function handle()
     {
+        $this->line('Flushing...');
+        $this->line(\Illuminate\Support\Facades\Redis::connection('default')->dbsize());
         Redis::connection($this->argument('connection'))->flushdb();
         Redis::connection($this->argument('connection'))->flushall();
+        $this->line('Flushed.');
+        $this->line(\Illuminate\Support\Facades\Redis::connection('default')->dbsize());
     }
 }

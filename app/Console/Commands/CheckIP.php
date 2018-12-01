@@ -43,7 +43,7 @@ class CheckIP extends Command
 
             $window->visit('https://www.iplocation.net/');
 
-//            $window->screenshot("IP " . now()->format('H.i.s'));
+            $window->screenshot("IP " . now()->format('H.i.s'));
 
             $this->info($window->text('#wrapper > section > div > div > div.col.col_8_of_12 > div:nth-child(11) > div > table'));
             $this->info($window->text('#wrapper > section > div > div > div.col.col_8_of_12 > div:nth-child(12) > div > table'));

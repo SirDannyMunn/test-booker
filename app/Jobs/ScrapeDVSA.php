@@ -47,12 +47,15 @@ class ScrapeDVSA implements ShouldQueue
     public function handle()
     {
         Redis::connection('default')->funnel('ScrapeDVSA')->limit(10)->then(function () {
+        Redis::connection('default')->funnel($this->user->id)->limit(1)->then(function() {
 
-            \Log::info($this->user ." - ". now()->toTimeString() ." - ". $this->random);
+            \Log::info($this->user->name ." - ". now()->toTimeString() ." - ". $this->random);
 
             (new Browser)->browse(function ($window) {
 
                 $this->window = $window;
+
+                \Log::info('Logging in');
 
                 $this->login();
 
@@ -90,9 +93,15 @@ class ScrapeDVSA implements ShouldQueue
 
                 $this->window->quit();
             });
+
         }, function () {
 
-            \Log::info('Releasing');
+            \Log::info('Releasing user');
+            return $this->release(10);
+        });
+        }, function () {
+
+            \Log::info('Releasing job');
             return $this->release(10);
         });
     }
@@ -120,6 +129,8 @@ class ScrapeDVSA implements ShouldQueue
 
     private function login()
     {
+        $this->window->screenshot(__FUNCTION__);
+
         $this->window->visit('https://www.gov.uk/change-driving-test')
             ->clickLink('Start now')
             ->type('#driving-licence-number', decrypt($this->user->dl_number))
@@ -131,17 +142,23 @@ class ScrapeDVSA implements ShouldQueue
 
     private function checkCaptcha()
     {
+        $this->window->screenshot(__FUNCTION__);
+
         // Handle captcha
         $captcha = $this->window->checkPresent('recaptcha_challenge_image');
         if ($captcha) {
-            // Do something
-            $this->window->screenshot("CAPTCHA-".now()->format('h.m.i'));
-            $this->line('FAILED - CAPTCHA FOUND');
+            $now = now()->format('h.m.i');
+            $this->window
+                ->screenshot("CAPTCHA-{$now}")
+                ->deleteCookies();
+            \Log::alert("CAPTHA FOUND {$now}");
         }
     }
 
     private function goToCalendar()
     {
+        $this->window->screenshot(__FUNCTION__);
+
         $this->window->click('#date-time-change')
             ->click('#test-choice-earliest')
             ->pause(rand(250, 1000))
@@ -154,6 +171,8 @@ class ScrapeDVSA implements ShouldQueue
      */
     private function sendNotifications($to_notify)
     {
+        $this->window->screenshot(__FUNCTION__);
+
         $list = $to_notify->collapse()->groupBy('user.id');
 
         $users = User::all();
