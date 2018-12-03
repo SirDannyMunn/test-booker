@@ -5,6 +5,9 @@ sudo apt-get install polipo
 # restart polipo
 # sudo /etc/init.d/polipo restart
 
+# sudo npm -g install chromedriver --unsafe-perm=true --allow-root
+
+
 sudo ln -s /etc/polipo/config /home/vagrant/Dev/laravel-web-crawler/polipo
 
 # Add cron task

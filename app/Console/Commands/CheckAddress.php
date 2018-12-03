@@ -41,14 +41,15 @@ class CheckAddress extends Command
     {
         (new Browser)->browse(function($window) {
 
-            $protocol = $this->option('s') ? 'https://' : 'http://';
+            $protocol = $this->option('s') ? 'https' : 'http';
             $address =  $this->argument('address');
 
-            $window->maximize()
-                ->visit("{$protocol}{$address}")
-                ->screenshot("address" . now()->format('H.i.s'));
+            $window->visit("{$protocol}://{$address}");
 
-            $this->line($window->getUrl());
+            $window->screenshot("address" . now()->format('H.i.s'));
+
+            $url = $window->getUrl();
+            $this->line($url);
 
             $window->quit();
         });

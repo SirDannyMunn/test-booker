@@ -37,7 +37,7 @@ class Browser
             $callback($this->browser);
         } catch (Exception $e) {
 //            $filename = now()->format('y-m-d h.m i') .' '. preg_replace('/[^A-Za-z0-9 _ .-]/', ' ', $e->getMessage());
-            $time = now()->format('y-m-d h.m i');
+            $time = now()->format('y-m-d h.i.s');
             Log::alert("{$time} - dusk failed: {$e->getMessage()}");
             $this->browser->screenshot(now()->format('y-m-d h.m i'));
             throw $e;
@@ -97,7 +97,9 @@ class Browser
         $options = $options = (new ChromeOptions)->addArguments([
             '--disable-gpu',
             '--headless',
+//            '--disable-dev-shm-usage',
             '--ignore-certificate-errors',
+            '--allow-insecure-localhost'
         ]);
 
         $capabilities = DesiredCapabilities::chrome();
@@ -105,6 +107,7 @@ class Browser
         $url = 'localhost:8123';
         $proxy = ['proxyType' => 'manual', 'httpProxy' => $url, 'sslProxy' => $url];
         $capabilities->setCapability(WebDriverCapabilityType::PROXY, $proxy);
+        $capabilities->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, 'true');
         $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
         $driver = RemoteWebDriver::create(
             'http://127.0.0.1:9515', $capabilities

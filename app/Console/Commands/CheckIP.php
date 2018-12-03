@@ -12,7 +12,7 @@ class CheckIP extends Command
      *
      * @var string
      */
-    protected $signature = 'check:ip';
+    protected $signature = 'check:ip {--s}';
 
     /**
      * The console command description.
@@ -41,14 +41,22 @@ class CheckIP extends Command
     {
         (new Browser)->browse(function($window) {
 
-            $window->visit('https://www.iplocation.net/');
+            $protocol = $this->option('s') ? 'https' : 'http';
+            $this->line($protocol);
 
-            $window->screenshot("IP " . now()->format('H.i.s'));
+//            $window->visit('https://www.iplocation.net/');
+            $window->visit("{$protocol}://ipinfo.info/html/ip_checker.php");
 
-            $this->info($window->text('#wrapper > section > div > div > div.col.col_8_of_12 > div:nth-child(11) > div > table'));
-            $this->info($window->text('#wrapper > section > div > div > div.col.col_8_of_12 > div:nth-child(12) > div > table'));
-            $this->info($window->text('#wrapper > section > div > div > div.col.col_8_of_12 > div:nth-child(13) > div > table'));
-            $this->info($window->text('#wrapper > section > div > div > div.col.col_8_of_12 > div:nth-child(14) > div > table'));
+//            $window->screenshot("IP " . now()->format('H.i.s'));
+            $this->line("At page");
+
+//            $url = $window->getUrl();
+            $ip = $window->text('#Text14 > p > span > a > b');
+            $this->line($ip);
+//            $this->info($window->text('#wrapper > section > div > div > div.col.col_8_of_12 > div:nth-child(11) > div > table'));
+//            $this->info($window->text('#wrapper > section > div > div > div.col.col_8_of_12 > div:nth-child(12) > div > table'));
+//            $this->info($window->text('#wrapper > section > div > div > div.col.col_8_of_12 > div:nth-child(13) > div > table'));
+//            $this->info($window->text('#wrapper > section > div > div > div.col.col_8_of_12 > div:nth-child(14) > div > table'));
 
             $window->quit();
         });

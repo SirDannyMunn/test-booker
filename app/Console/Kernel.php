@@ -34,12 +34,12 @@ class Kernel extends ConsoleKernel
         ->get();
 
         if (!filled($users)) {
-            Log::notice('No Users - '.now()->toDateTimeString());
-            return;
+            Log::notice('No Users - '.now()->toDateTimeString()); return;
         }
 
         // allowed visits per hour split between people and limited to >= 1
         $frequency = round( 60 / (315 / count($users) ) - 0.499 ) ?: 1;
+        $frequency = 2;
 
         $users->load(['locations' => function($location) use ($frequency) {
             return $location->where('last_checked', '<', now()->subMinutes($frequency)->timestamp);
@@ -50,9 +50,6 @@ class Kernel extends ConsoleKernel
             $best_users = (new User)->getBest($users, $locations);
 
             $random = str_random(3);
-
-            \Log::info('Starting :' . $random);
-            \Log::info($best_users);
 
             foreach ($best_users as $user) {
                 ScrapeDVSA::dispatch($user, $random)->onConnection('redis');
