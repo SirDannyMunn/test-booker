@@ -1,7 +1,7 @@
 sudo apt-get install polipo
 
 # configure polipo
-# nano  /etc/polipo/config
+# nano /etc/polipo/config
 # restart polipo
 # sudo /etc/init.d/polipo restart
 

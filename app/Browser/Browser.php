@@ -97,9 +97,19 @@ class Browser
         $options = $options = (new ChromeOptions)->addArguments([
             '--disable-gpu',
             '--headless',
-//            '--disable-dev-shm-usage',
-            '--ignore-certificate-errors',
-            '--allow-insecure-localhost'
+//            '--ignore-certificate-errors',
+//            '--ignore-urlfetcher-cert-requests',
+//            '--allow-insecure-localhost',
+//            '--disable-background-networking',
+//            '--disable-client-side-phishing-detection',
+//            '--disable-default-apps',
+//            '--disable-hang-monitor',
+//            '--disable-popup-blocking',
+//            '--disable-prompt-on-repost',
+//            '--disable-sync',
+//            '--disable-web-resources',
+//            '--enable-automation',
+//            '--enable-logging',
         ]);
 
         $capabilities = DesiredCapabilities::chrome();
