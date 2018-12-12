@@ -1,0 +1,19 @@
+
+# HTTP
+
+http://www.googletagmanager.com
+http://cdnjs.cloudflare.com
+http://ipinfo.info/assets/images
+
+# SSL
+
+https://www.google-analytics.com
+https://www.googletagmanager.com
+https://www.google.com
+
+https://ipinfo.info/assets/images
+https://googleads.g.doubleclick.net
+https://adservice.google.co.jp
+https://adservice.google.cl
+https://adservice.google.com
+https://gstatic.com

@@ -2,22 +2,24 @@
 
 Route::get('/test', function () {
 
-    (new \App\Jobs\ScrapeDVSA(\App\User::find(7), 'dasddas'))->handle();
+//    (new \App\Jobs\ScrapeDVSA(\App\User::find(7), 'dasddas'))->handle();
+     \Illuminate\Support\Facades\Artisan::call('check:ip');
+
 
 //    \App\User::find(7)->notify(new \App\Notifications\ReservationMade(\App\User::find(7), ['date' => '12:01:12', 'location' => 'skippers']));
 
 
-    $users = \App\User::where('booked', false)
-        ->whereDate('test_date', '>', now()->endOfDay()->addWeekdays(3))
-        ->get();
-
-    $frequency=1;
-    $users->load(['locations' => function($location) use ($frequency) {
-        return $location->where('last_checked', '<', now()->subMinutes($frequency)->timestamp);
-    }]);
-
-    $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
-    return $best_users = (new \App\User())->getBest($users, $locations);
+//    $users = \App\User::where('booked', false)
+//        ->whereDate('test_date', '>', now()->endOfDay()->addWeekdays(3))
+//        ->get();
+//
+//    $frequency=1;
+//    $users->load(['locations' => function($location) use ($frequency) {
+//        return $location->where('last_checked', '<', now()->subMinutes($frequency)->timestamp);
+//    }]);
+//
+//    $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
+//    return $best_users = (new \App\User())->getBest($users, $locations);
 
 
 //    return \Illuminate\Support\Facades\Queue::connection('database')->
@@ -28,9 +30,9 @@ Route::get('/test', function () {
 //    ->whereDate('test_date', '>', now()->endOfDay()->addWeekdays(3))
 //    ->get();
 
-    return $users = \App\User::where('booked', false)->whereDate('test_date', '>' , now()->addWeekdays(3))->with(['locations' => function($location) {
-        return $location->where('last_checked', '<', now()->timestamp);
-    }])->get();
+//    return $users = \App\User::where('booked', false)->whereDate('test_date', '>' , now()->addWeekdays(3))->with(['locations' => function($location) {
+//        return $location->where('last_checked', '<', now()->timestamp);
+//    }])->get();
 
 //    $browser = new
 
