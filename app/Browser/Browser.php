@@ -4,26 +4,13 @@ namespace App\Browser;
 
 use Closure;
 use Exception;
-use Facebook\WebDriver\Firefox\FirefoxPreferences;
-use Facebook\WebDriver\Remote\WebDriverBrowserType;
 use Facebook\WebDriver\Remote\WebDriverCapabilityType;
-use Facebook\WebDriver\WebDriverPlatform;
-use Symfony\Component\Process\Process;
 use Throwable;
 use Tpccdaniel\DuskSecure\Browser as DuskBrowser;
 use Facebook\WebDriver\Chrome\ChromeOptions;
-use Facebook\WebDriver\Firefox\FirefoxDriver;
-use Facebook\WebDriver\Firefox\FirefoxProfile;
-
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Tpccdaniel\DuskSecure\BrowserInstance;
-use Tpccdaniel\DuskSecure\Concerns\ProvidesBrowser;
-use Tpccdaniel\DuskSecure\Selenium\StartsSelenium;
-use Tpccdaniel\DuskSecure\Selenium\StartsXvfb;
-
-//use Tpccdaniel\DuskSecure\Selenium\StartsSelenium;
-//use Tpccdaniel\DuskSecure\Selenium\StartsXvfb;
 
 /**
  * Reporting browser for console commands
@@ -47,9 +34,9 @@ class Browser extends BrowserInstance
             $callback($this->browser);
         } catch (Exception $e) {
 //            $filename = now()->format('y-m-d h.m i') .' '. preg_replace('/[^A-Za-z0-9 _ .-]/', ' ', $e->getMessage());
-//            $time = now()->format('y-m-d h.i.s');
+            $time = now()->format('y-m-d h.i.s');
 //            Log::alert("{$time} - dusk failed: {$e->getMessage()}");
-//            $this->browser->screenshot(now()->format('y-m-d h.m i'));
+            $this->browser->screenshot($time);
             throw $e;
         } catch (Throwable $e) {
             throw $e;
@@ -97,14 +84,6 @@ class Browser extends BrowserInstance
      */
     public function prepare()
     {
-//        static::$seleniumProcess = static::buildSeleniumProcess();
-//        static::$seleniumProcess->start();
-//        ProvidesBrowser::afterClass(function () {
-//            static::stopSelenium();
-//        });
-//        sleep(4);
-
-
         if (!$this->browser) {
             $this->browser = $this->newBrowser($this->createWebDriver());
         }
@@ -116,61 +95,31 @@ class Browser extends BrowserInstance
     protected function driver()
     {
 
-//        exec('rm -r '.base_path('chromedriver.log'));
+        exec('rm -r '.base_path('chromedriver.log'));
+        exec('rm -r '.storage_path('logs/laravel-'.now()->format('Y-m-d').'.log'));
 
         static::startChromeDriver([
 //            '--verbose',
             '--log-path=chromedriver.log'
         ]);
 
-//        $url = '127.0.0.1:8123';
-//        $url = '0.0.0.0:8123';
-        $url = 'localhost:3128';
-        $proxy = ['proxyType' => 'manual', 'httpProxy' => $url, 'sslProxy' => $url, 'ftpProxy' => $url];
-
+        $userAgent = $this->getUserAgent();
         $options = (new ChromeOptions)->addArguments([
             '--disable-gpu',
             '--headless',
-            '--disable-accelerated-jpeg-decoding',
-//            '--ignore-certificate-errors',
-//            '--allow-insecure-localhost',
-//            '--disable-background-networking',
-//            '--disable-client-side-phishing-detection',
-//            '--disable-default-apps',
-//            '--aggressive-cache-discard',
-//            '--ignore-urlfetcher-cert-requests',
-//            '--disable-hang-monitor',
-//            '--disable-popup-blocking',
-//            '--disable-prompt-on-repost',
-//            '--disable-sync',
-//            '--disable-web-resources',
-//            '--enable-automation',
-//            '--incognito',
-//            '--enable-logging',
+            '--ignore-certificate-errors',
+//            "--user-agent={$userAgent}"
         ]);
 
         $capabilities = DesiredCapabilities::chrome();
-        $capabilities->setCapability(WebDriverCapabilityType::PROXY, $proxy);
-        $capabilities->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true);
-        $capabilities->setCapability("acceptInsecureCerts", true);
         $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
+        $capabilities->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true);
 
-//        $capabilities = DesiredCapabilities::firefox();
-//        $capabilities = new DesiredCapabilities([
-//            "alwaysMatch" => [
-//                WebDriverCapabilityType::BROWSER_NAME => WebDriverBrowserType::FIREFOX,
-//                WebDriverCapabilityType::PLATFORM => WebDriverPlatform::ANY,
-//                'acceptInsecureCerts', "true"
-//            ]
-//        ]);
-//        $options = new FirefoxProfile();
-//        $options->setPreference(FirefoxPreferences::READER_PARSE_ON_LOAD_ENABLED, false);
-//        $options->setPreference('portPreference', '4444');
-//        $capabilities->setCapability(FirefoxDriver::PROFILE, $options);
-//        $capabilities->setCapability(
-//            FirefoxDriver::PROFILE,
-//            $options
-//        );
+        $url = 'localhost:3128';
+//        $url = '188.166.172.192:3128';
+        $capabilities->setCapability(WebDriverCapabilityType::PROXY,
+            ['proxyType' => 'manual', 'httpProxy' => $url, 'sslProxy' => $url, 'ftpProxy' => $url]
+        );
 
         $driver = RemoteWebDriver::create(
             'http://127.0.0.1:9515', $capabilities,
@@ -181,6 +130,34 @@ class Browser extends BrowserInstance
         return $driver;
     }
 
+    public function getUserAgent()
+    {
+        $userAgents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:52.0) Gecko/20100101 Firefox/52.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/602.4.8 (KHTML, like Gecko) Version/10.0.3 Safari/602.4.8',
+            'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:52.0) Gecko/20100101 Firefox/52.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/602.4.8 (KHTML, like Gecko) Version/10.0.3 Safari/602.4.8',
+            'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 5.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'
+        ];
+
+        return $userAgents[rand(0, count($userAgents))];
+    }
+
     /**
      * @throws Exception
      */
@@ -189,46 +166,5 @@ class Browser extends BrowserInstance
         if ($this->browser) {
             $this->closeBrowser();
         }
-    }
-
-    protected static function buildSeleniumProcess() : Process
-    {
-        if (static::$seleniumPath) {
-            $seleniumPath = realpath(static::$seleniumPath);
-        } else {
-            $seleniumPath = realpath(base_path('selenium-server-standalone-3.141.59.jar'));
-        }
-
-        if ($seleniumPath === false) {
-            throw new \RuntimeException(
-                "Invalid path to selenium server [{$seleniumPath}]."
-            );
-        }
-        if (static::$geckoDriverPath) {
-            $geckoDriverPath = realpath(static::$geckoDriverPath);
-        } else {
-            $geckoDriverPath = realpath(base_path('geckodriver'));
-        }
-        if ($geckoDriverPath === false) {
-            throw new \RuntimeException(
-                "Invalid path to geckodriver [{$geckoDriverPath}]."
-            );
-        }
-
-        $processBuilder = (new Process([
-            'java',
-            "-webdriver.gecko.driver=$geckoDriverPath",
-            '-jar',
-            '-enablePassThrough false',
-            $seleniumPath
-        ]));
-
-//        if (env('HEADLESS_MODE')) {
-//            $processBuilder->setEnv('DISPLAY', ':10');
-//        }
-
-        $processBuilder->setEnv(['DISPLAY' => ':10']);
-
-        return $processBuilder;
     }
 }

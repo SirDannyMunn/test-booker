@@ -5,7 +5,6 @@ sudo apt-get install polipo
 # sudo /etc/init.d/polipo restart
 # sudo npm -g install chromedriver --unsafe-perm=true --allow-root
 
-
 # sudo apt-get install linuxbrew-wrapper
 # brew update
 # brew update
@@ -17,8 +16,7 @@ sudo apt-get install polipo
 # export PATH=$PATH:/home/vagrant/.linuxbrew/Cellar/crawlera-headless-proxy/1.0.0/bin
 # crawlera-headless-proxy --help
 
-
-crawlera-headless-proxy -c ~/Dev/laravel-web-crawler/app/Browser/proxy/crawlera-headless-proxy.toml
+crawlera-headless-proxy -c ~/Dev/laravel-web-crawler/app/Browser/proxy/config.toml
 
 sudo ln -s /etc/polipo/config /home/vagrant/Dev/laravel-web-crawler/polipo
 

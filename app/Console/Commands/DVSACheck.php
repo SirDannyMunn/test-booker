@@ -10,6 +10,7 @@ use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriverBy;
 use Illuminate\Console\Command;
 use App\Browser\Browser;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class DVSACheck
@@ -79,21 +80,23 @@ class DVSACheck extends Command
             $this->window = $browser;
 
             // Login
-            $this->window->visit('https://www.gov.uk/change-driving-test')
-                    ->clickLink('Start now')
-                    ->type('#driving-licence-number', $data['username'])
-                    ->type('#application-reference-number', $data['password'])
-                    ->click('#booking-login');
+            $this->window->visit('https://www.gov.uk/change-driving-test');
+            $this->window->screenshot('Home');
+            $this->window->clickLink('Start now');
+            $this->window->screenshot('Login Page');
+            // Handle captcha
+            if ($this->window->captcha()) {
+                $this->window->pause(10000)->screenshot("CAPTCHA-".now()->format('h.m.i'));
+                Log::info($this->window->captcha());
+            }
+
+            Log::info($this->window->html('body')[0]);
+
+            $this->window->type('#driving-licence-number', $data['username']);
+            $this->window->type('#application-reference-number', $data['password']);
+            $this->window->click('#booking-login');
 
             $this->window->pause(rand(250, 1000));
-
-            // Handle captcha
-            $captcha = $this->window->checkPresent('recaptcha_challenge_image');
-            if ($captcha) {
-                // Do something
-                $this->window->screenshot("CAPTCHA-".now()->format('h.m.i'));
-                $this->line('FAILED - CAPTCHA FOUND');
-            }
 
             $this->window->click('#date-time-change')
                          ->click('#test-choice-earliest')

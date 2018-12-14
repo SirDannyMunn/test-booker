@@ -31,10 +31,10 @@ class ScrapeDVSA implements ShouldQueue
      * @param $user
      * @param $random
      */
-    public function __construct($user, $random)
+    public function __construct($user)
     {
         $this->user = $user;
-        $this->random = $random;
+//        $this->random = $random;
 //        $this->browser = ;
     }
 
@@ -129,10 +129,14 @@ class ScrapeDVSA implements ShouldQueue
 
     private function login()
     {
-        $this->window->screenshot(__FUNCTION__);
 
-        $this->window->visit('https://www.gov.uk/change-driving-test')
-            ->clickLink('Start now')
+        $this->window->visit('https://www.gov.uk/change-driving-test');
+
+
+        $this->window->click('#get-started > a');
+
+        $this->window->screenshot(__FUNCTION__);
+        $this->window
             ->type('#driving-licence-number', decrypt($this->user->dl_number))
             ->type('#application-reference-number', decrypt($this->user->ref_number))
             ->click('#booking-login');

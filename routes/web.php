@@ -3,11 +3,13 @@
 Route::get('/test', function () {
 
 //    (new \App\Jobs\ScrapeDVSA(\App\User::find(7), 'dasddas'))->handle();
-     \Illuminate\Support\Facades\Artisan::call('check:ip');
+//     \Illuminate\Support\Facades\Artisan::call('check:ip');
 
+//    (new \App\Jobs\ScrapeDVSA(\App\User::find(1)))->handle();
 
 //    \App\User::find(7)->notify(new \App\Notifications\ReservationMade(\App\User::find(7), ['date' => '12:01:12', 'location' => 'skippers']));
 
+     \Illuminate\Support\Facades\Artisan::call('dvsa:access');
 
 //    $users = \App\User::where('booked', false)
 //        ->whereDate('test_date', '>', now()->endOfDay()->addWeekdays(3))
@@ -38,7 +40,6 @@ Route::get('/test', function () {
 
 //    return \Illuminate\Support\Facades\Redis::connection('default');
 //    return ;
-//     \Illuminate\Support\Facades\Artisan::call('dvsa:access');
 
 });
 

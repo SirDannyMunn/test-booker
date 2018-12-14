@@ -46,10 +46,16 @@ class CheckAddress extends Command
 
             $window->visit("{$protocol}://{$address}");
 
-//            $window->screenshot("address" . now()->format('H.i.s'));
+            $window->screenshot("address" . now()->format('H.i.s'));
 
             $url = $window->getUrl();
             $this->line($url);
+
+            //
+
+//            $window->type('')
+
+            //
 
             $window->quit();
         });

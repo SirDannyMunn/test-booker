@@ -7,6 +7,10 @@ http://ipinfo.info/assets/images
 
 # SSL
 
+https://assets.publishing.service.gov.uk
+https://assets.publishing.service.gov.uk/static/images
+https://driverpracticaltest.direct.gov.uk/_Incapsula_Resource
+
 https://www.google-analytics.com
 https://www.googletagmanager.com
 https://www.google.com
