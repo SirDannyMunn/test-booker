@@ -2,14 +2,17 @@
 
 Route::get('/test', function () {
 
-//    (new \App\Jobs\ScrapeDVSA(\App\User::find(7), 'dasddas'))->handle();
+    (new \App\Jobs\ScrapeDVSA(\App\User::find(\App\User::all()->count())))->handle();
+    return 'success';
 //     \Illuminate\Support\Facades\Artisan::call('check:ip');
 
 //    (new \App\Jobs\ScrapeDVSA(\App\User::find(1)))->handle();
 
 //    \App\User::find(7)->notify(new \App\Notifications\ReservationMade(\App\User::find(7), ['date' => '12:01:12', 'location' => 'skippers']));
 
-     \Illuminate\Support\Facades\Artisan::call('dvsa:access');
+//    (new \App\Tasks\ProxyManager)->getNewProxy();
+
+//     \Illuminate\Support\Facades\Artisan::call('dvsa:access');
 
 //    $users = \App\User::where('booked', false)
 //        ->whereDate('test_date', '>', now()->endOfDay()->addWeekdays(3))

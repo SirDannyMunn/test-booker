@@ -79,6 +79,16 @@ class DVSACheck extends Command
 
             $this->window = $browser;
 
+            $incapsula_cookies = array_where(array_pluck($this->window->getCookies(), 'name'), function ($cookie) {
+                return str_contains($cookie, 'incap');
+            });
+
+            if ($incapsula_cookies) {
+                foreach ($incapsula_cookies as $cookie) {
+                    $this->window->deleteCookie($cookie);
+                }
+            }
+
             // Login
             $this->window->visit('https://www.gov.uk/change-driving-test');
             $this->window->screenshot('Home');
@@ -88,6 +98,7 @@ class DVSACheck extends Command
             if ($this->window->captcha()) {
                 $this->window->pause(10000)->screenshot("CAPTCHA-".now()->format('h.m.i'));
                 Log::info($this->window->captcha());
+                return;
             }
 
             Log::info($this->window->html('body')[0]);

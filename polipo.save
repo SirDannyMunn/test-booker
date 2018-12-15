@@ -1,8 +1,0 @@
-# This file only needs to list configuration variables that deviate
-# from the default values.  See /usr/share/doc/polipo/examples/config.sample
-# and "polipo -v" for variables you can tweak and further information.
-
-logSyslog = true
-logFile = /var/log/polipo/polipo.log
-#parentProxy = "proxy.crawlera.com:8010"
-#parentAuthCredentials = "accb2a6ad600495b917187f2873558ec:"

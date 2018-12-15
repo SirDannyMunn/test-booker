@@ -3,7 +3,9 @@
 namespace App\Jobs;
 
 use App\Browser\Browser;
+use App\Location;
 use App\Notifications\ReservationMade;
+use App\Tasks\SlotManager;
 use App\User;
 use Carbon\Carbon;
 use Facebook\WebDriver\WebDriverBy;
@@ -13,16 +15,21 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
-class ScrapeDVSA implements ShouldQueue
+class ScrapeDVSA // implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+//    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 3;
     public $timeout = 240;
     private $user;
     private $random;
+
+    /**
+     * @var \Tpccdaniel\DuskSecure\Browser
+     */
     private $window;
 
     /**
@@ -55,34 +62,30 @@ class ScrapeDVSA implements ShouldQueue
 
                 $this->window = $window;
 
-                \Log::info('Logging in');
-
+                $this->deleteIncapsulaCookies();
                 $this->login();
-
-                \Log::info('logged in');
-
                 $this->checkCaptcha();
-
                 $this->goToCalendar();
 
-                \Log::info('at calendar');
+                // $all_slots = json_decode(file_get_contents(base_path('data/all_slots.json')), true);
+                // $slots = $all_slots[$location->name];
 
-//                $all_slots = json_decode(file_get_contents(base_path('data/all_slots.json')), true);
                 $to_notify = collect();
-                foreach ($this->user->locations as $location) {
-                    $this->window->pause(rand(250,1000))
-                        ->click('#change-test-centre')
-                        ->pause(rand(250,1000))
-                        ->type('#test-centres-input', $location->name)
-                        ->pause(rand(250,1000))
-                        ->click('#test-centres-submit')
-                        ->pause(rand(250,1000))
-                        ->clickLink(ucfirst($location->name));
+                $slotManager = new SlotManager;
+                foreach ($this->user->locations as $location) { /* @var $location Location */
+                    $this->window
+                    ->pause(rand(250,1000))
+                    ->click('#change-test-centre')
+                    ->pause(rand(250,1000))
+                    ->type('#test-centres-input', $location->name)
+                    ->pause(rand(250,1000))
+                    ->click('#test-centres-submit')
+                    ->pause(rand(250,1000))
+                    ->clickLink(ucfirst($location->name));
 
-                    $slots = $this->scrapeSlots($location->name);
-//                    $slots = $all_slots[$location->name];
+                    $slots = $this->getSlots($location->name);
                     $location->update(['last_checked' => now()->timestamp]);
-                    $to_notify->push($this->getScores($slots, $location));
+                    $to_notify->push($slotManager->getMatches($slots, $location));
                 }
 
                 if ($book=false) {
@@ -106,34 +109,28 @@ class ScrapeDVSA implements ShouldQueue
         });
     }
 
-    /**
-     * @param $location
-     * @return array
-     */
-    public function scrapeSlots($location)
+    private function deleteIncapsulaCookies()
     {
-        $slots = [];
-        $slots[$location] = [];
-        foreach (array_slice($this->window->elements('.SlotPicker-slot-label'), 0, 20) as $element) { /** @var $element RemoteWebElement */
-            $string = $element->findElement(
-                WebDriverBy::className('SlotPicker-slot')
-            )->getAttribute('data-datetime-label');
+        $incapsula_cookies = array_where(array_pluck( (array) $this->window->getCookies(), 'name'), function ($cookie) {
+            return str_contains($cookie, 'incap');
+        });
 
-            $slot = Carbon::parse($string)->toDateTimeString();
-
-            array_push($slots[$location], $slot);
+        foreach ($incapsula_cookies as $cookie) {
+            $this->window->deleteCookie($cookie);
         }
-
-        return array_values($slots);
     }
 
     private function login()
     {
+        $url = 'https://www.gov.uk/change-driving-test';
+        $this->window->visit($url);
 
-        $this->window->visit('https://www.gov.uk/change-driving-test');
-
+//        if (rand(0,1))
+//            $this->window->back()->visit($url);
 
         $this->window->click('#get-started > a');
+
+        $this->checkCaptcha();
 
         $this->window->screenshot(__FUNCTION__);
         $this->window
@@ -146,16 +143,10 @@ class ScrapeDVSA implements ShouldQueue
 
     private function checkCaptcha()
     {
-        $this->window->screenshot(__FUNCTION__);
-
-        // Handle captcha
-        $captcha = $this->window->checkPresent('recaptcha_challenge_image');
-        if ($captcha) {
-            $now = now()->format('h.m.i');
-            $this->window
-                ->screenshot("CAPTCHA-{$now}")
-                ->deleteCookies();
-            \Log::alert("CAPTHA FOUND {$now}");
+        if ($this->window->captcha()) {
+            $this->window->pause(10000)->screenshot("CAPTCHA-".now()->format('h.m.i'));
+            Log::info($this->window->captcha());
+            abort(500, 'Captcha found');
         }
     }
 
@@ -175,13 +166,9 @@ class ScrapeDVSA implements ShouldQueue
      */
     private function sendNotifications($to_notify)
     {
-        $this->window->screenshot(__FUNCTION__);
-
-        $list = $to_notify->collapse()->groupBy('user.id');
-
         $users = User::all();
 
-        foreach ($list as $item) { /* @var $item Collection
+        foreach ($to_notify->collapse()->groupBy('user.id') as $item) { /* @var $user User*/ /* @var $item Collection
          *  collection of users and slots, ranked and sorted to acquire best match
          */
             $item = $item->sortByDesc('date')->sortByDesc('user.points')[0];
@@ -191,80 +178,23 @@ class ScrapeDVSA implements ShouldQueue
     }
 
     /**
-     * @param $slots
      * @param $location
-     * @return \Illuminate\Support\Collection
-     */
-    private function getScores($slots, $location)
-    {
-        $users = $location->users->sortByDesc('priority');
-        $slots = $this->removeSlotsAfter($slots,
-            Carbon::parse($users->pluck('test_date')->sort()->last())
-        );
-
-        $user_points = [];
-        foreach ($slots[0] as $slot) {
-            $user_points[$slot] = [];
-            foreach ($users as $user) {
-                $id = $user->id;
-                $user_points[$slot][$id] = 0;
-                if (Carbon::parse($slot)->greaterThan($user->test_date))
-                    continue;
-                if ($user->location == $location->name)
-                    $user_points[$slot][$id] += 2;
-                if ($user->priority)
-                    $user_points[$slot][$id] += 1;
-            }
-        }
-
-        if (!$user_points) {
-            $this->window->quit();
-            return collect();
-        }
-
-        $eligible_candidates = $this->sliceEligibleCandidates($user_points);
-
-        $slots = $eligible_candidates->map(function ($ids, $date) use ($eligible_candidates, $location) {
-            $users = collect($ids)->filter()->sort()->map(function ($value, $key) {
-                return ['id' => $key, 'points' => $value];
-            })->values();
-
-            $item = ['date' => $date,
-                'location' => $location->name,
-                'user' => $users[$eligible_candidates->keys()->search($date)]];
-
-            return $item;
-        })->values();
-
-        return $slots;
-    }
-
-    /**
-     * @param $user_points
-     * @return \Illuminate\Support\Collection
-     */
-    private function sliceEligibleCandidates($user_points)
-    {
-        $eligible_candidates = array_where(array_first($user_points), function ($value) {
-            return $value != 0;
-        });
-
-        return collect(array_slice($user_points, 0, count($eligible_candidates)));
-    }
-
-    /**
-     * @param $slots
-     * @param $latest_test_date Carbon
      * @return array
      */
-    private function removeSlotsAfter($slots, $latest_test_date)
+    public function getSlots($location)
     {
-        // Loop though slots until get to the point then break and slice array with index
-        foreach ($slots as $index => $slot) {
-            if ($latest_test_date->lessThanOrEqualTo($slot)) {
-                return array_slice($slots, 0, $index);
-            }
+        $slots = [];
+        $slots[$location] = [];
+        foreach (array_slice($this->window->elements('.SlotPicker-slot-label'), 0, 20) as $element) { /** @var $element RemoteWebElement */
+            $string = $element->findElement(
+                WebDriverBy::className('SlotPicker-slot')
+            )->getAttribute('data-datetime-label');
+
+            $slot = Carbon::parse($string)->toDateTimeString();
+
+            array_push($slots[$location], $slot);
         }
-        return $slots;
+
+        return array_values($slots);
     }
 }

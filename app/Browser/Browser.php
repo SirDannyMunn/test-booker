@@ -2,6 +2,8 @@
 
 namespace App\Browser;
 
+use App\Tasks\ProxyManager;
+use App\User;
 use Closure;
 use Exception;
 use Facebook\WebDriver\Remote\WebDriverCapabilityType;
@@ -84,50 +86,46 @@ class Browser extends BrowserInstance
      */
     public function prepare()
     {
+        $chrome_log_path = storage_path('logs/chromedriver.log');
+        exec('rm -r '.$chrome_log_path);
+        exec('rm -r '.storage_path('logs/laravel-'.now()->format('Y-m-d').'.log'));
+
+        static::startChromeDriver([
+            '--verbose',
+            "--log-path={$chrome_log_path}"
+        ]);
+
         if (!$this->browser) {
             $this->browser = $this->newBrowser($this->createWebDriver());
         }
     }
-
-    /**
-     * @return RemoteWebDriver
-     */
-    protected function driver()
+    
+    public function getConfig()
     {
+        $user = User::find(User::all()->count());
+//        $proxy = (new ProxyManager)->getProxy($user);
 
-        exec('rm -r '.base_path('chromedriver.log'));
-        exec('rm -r '.storage_path('logs/laravel-'.now()->format('Y-m-d').'.log'));
-
-        static::startChromeDriver([
-//            '--verbose',
-            '--log-path=chromedriver.log'
-        ]);
-
+        $capabilities = DesiredCapabilities::chrome();
+        $capabilities->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true);
         $userAgent = $this->getUserAgent();
-        $options = (new ChromeOptions)->addArguments([
+        $capabilities->setCapability(ChromeOptions::CAPABILITY, (new ChromeOptions)->addArguments([
             '--disable-gpu',
             '--headless',
             '--ignore-certificate-errors',
+//            "--user-agent={$proxy['randomUserAgent']}"
+//            "--user-agent=Mozilla/5.0 (Linux Android 4.0.4 DROID RAZR Build/6.7.2-180_DHD-16_M4-31) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari"
 //            "--user-agent={$userAgent}"
-        ]);
+        ]));
 
-        $capabilities = DesiredCapabilities::chrome();
-        $capabilities->setCapability(ChromeOptions::CAPABILITY, $options);
-        $capabilities->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true);
-
-        $url = 'localhost:3128';
-//        $url = '188.166.172.192:3128';
+//        $url = "{$proxy['ip']}:{$proxy['port']}";
+        $url = "45.115.175.8:55464";
+//        $url = "51.75.109.93:3128";
+//        $url = "74.82.238.69:43053";
         $capabilities->setCapability(WebDriverCapabilityType::PROXY,
             ['proxyType' => 'manual', 'httpProxy' => $url, 'sslProxy' => $url, 'ftpProxy' => $url]
         );
 
-        $driver = RemoteWebDriver::create(
-            'http://127.0.0.1:9515', $capabilities,
-            1000 * 1000,
-            1000 * 1000
-        );
-
-        return $driver;
+        return $capabilities;
     }
 
     public function getUserAgent()
@@ -156,6 +154,22 @@ class Browser extends BrowserInstance
         ];
 
         return $userAgents[rand(0, count($userAgents))];
+    }
+
+    /**
+     * @return RemoteWebDriver
+     */
+    protected function driver()
+    {
+        $capabilities = $this->getConfig();
+
+        $driver = RemoteWebDriver::create(
+            'http://127.0.0.1:9515', $capabilities,
+            6 * 10000, // 1 minute
+            6 * 10000
+        );
+
+        return $driver;
     }
 
     /**

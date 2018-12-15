@@ -1,3 +1,11 @@
+# Project info
+
+- [Project Ideas](#project)
+- [Installation](#installation)
+
+[Robotjs](https://github.com/octalmage/robotjs) is a desktop automation package to control fake user actions **for node**.
+[Robotjs-browser ](https://github.com/ml1nk/robotjs-browser) Browser version.
+
 sudo apt-get install polipo
 # configure polipo
 # nano /etc/polipo/config
@@ -16,7 +24,7 @@ sudo apt-get install polipo
 # export PATH=$PATH:/home/vagrant/.linuxbrew/Cellar/crawlera-headless-proxy/1.0.0/bin
 # crawlera-headless-proxy --help
 
-crawlera-headless-proxy -c ~/Dev/laravel-web-crawler/app/Browser/proxy/config.toml
+- crawlera-headless-proxy -c ~/Dev/laravel-web-crawler/app/Browser/proxy/config.toml
 
 sudo ln -s /etc/polipo/config /home/vagrant/Dev/laravel-web-crawler/polipo
 
@@ -32,6 +40,6 @@ sudo ln -s /etc/polipo/config /home/vagrant/Dev/laravel-web-crawler/polipo
 # certutil -L -d sql:${HOME}/.pki/nssdb
 # >> Crawlera CA                                                  CT,C,C
 
-php artisan config:clear
-php artisan config:cache
-php artisan horizon
+- php artisan config:clear
+- php artisan config:cache
+- php artisan horizon

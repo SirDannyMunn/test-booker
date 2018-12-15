@@ -1,6 +1,0 @@
-polipo / crawlera
-description: requests not being routed through crawlera, using host ip instead.
-remedy: accessed the polipo interface via localhost/polipo/<whatever>, initially with parent proxy configs
-still in place, then with them turned off (results: "Website crawl ban" when switched on and successful when off.)
-This process seemed to fix the problem.
-
