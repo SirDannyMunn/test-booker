@@ -6,7 +6,7 @@
  * Time: 14:35
  */
 
-namespace App\Tasks;
+namespace App\Modules;
 
 
 class SlotManager

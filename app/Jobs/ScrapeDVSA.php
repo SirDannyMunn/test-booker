@@ -5,7 +5,7 @@ namespace App\Jobs;
 use App\Browser\Browser;
 use App\Location;
 use App\Notifications\ReservationMade;
-use App\Tasks\SlotManager;
+use App\Modules\SlotManager;
 use App\User;
 use Carbon\Carbon;
 use Facebook\WebDriver\WebDriverBy;
@@ -41,8 +41,6 @@ class ScrapeDVSA // implements ShouldQueue
     public function __construct($user)
     {
         $this->user = $user;
-//        $this->random = $random;
-//        $this->browser = ;
     }
 
     /**
