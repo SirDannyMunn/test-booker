@@ -43,10 +43,10 @@ class ProxyManager
      */
     public function getProxy(User $user)
     {
-        $activeProxy = $user->proxy();
+        $activeProxy = Proxy::where('active', true)->whereDate('last_used', '<', now()->subMinutes(1)->toDateTimeString())->get();
 
-        if ($activeProxy) {
-            return $activeProxy;
+        if (filled($activeProxy)) {
+            return $activeProxy->random();
         }
 
         $proxy = $this->freshProxy();
@@ -64,7 +64,7 @@ class ProxyManager
             'query' => [
                 'apiKey' => 'Rr6QBHMTmVwpzfGJt3nYhvgqcdAb75KP',
                 "connectionType" => "Residential",
-                "referer" => false,
+//                "referer" => false,
 //                "country" => "GB"
             ]
         ];

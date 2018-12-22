@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Proxy extends Model
 {
-    protected $guarded;
+    protected $guarded = [];
 
     public function user()
     {
@@ -24,7 +24,8 @@ class Proxy extends Model
             'ip' => $data['ip'],
             'port' => $data['port'],
             'details' => json_encode($data),
-            'user_id' => $user['id']
+            'user_id' => $user['id'],
+            'last_used' => now()->toDateTimeString()
         ];
 
         Proxy::create($proxy);

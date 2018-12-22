@@ -26,6 +26,8 @@ class Browser extends BrowserInstance
      */
     protected $browser;
 
+    protected $proxy;
+
     /**
      * @param Closure $callback
      * @throws Throwable
@@ -35,7 +37,7 @@ class Browser extends BrowserInstance
         $this->prepare();
 
         try {
-            $callback($this->browser);
+            $callback($this->browser, $this->proxy);
         } catch (Exception $e) {
             $time = now()->format('y-m-d h.i.s');
             $stage = ScrapeDVSA::$stage;
@@ -90,7 +92,7 @@ class Browser extends BrowserInstance
     {
         $chrome_log_path = storage_path('logs/chromedriver.log');
         exec('rm -r '.$chrome_log_path);
-        exec('rm -r '.storage_path('logs/laravel-'.now()->format('Y-m-d').'.log'));
+//        exec('rm -r '.storage_path('logs/laravel-'.now()->format('Y-m-d').'.log'));
 
         static::startChromeDriver([
             '--verbose',
@@ -106,8 +108,8 @@ class Browser extends BrowserInstance
     {
         $user = User::find(User::all()->count());
 
-        $proxy = (new ProxyManager)->getProxy($user);
-        $url = "{$proxy['ip']}:{$proxy['port']}";
+        $this->proxy = (new ProxyManager)->getProxy($user);
+        $url = $this->proxy->proxy;
 
         return DesiredCapabilities::chrome()
                         ->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true)
@@ -131,8 +133,8 @@ class Browser extends BrowserInstance
 
         $driver = RemoteWebDriver::create(
             'http://127.0.0.1:9515', $capabilities,
-            6 * 10000, // 1 minute
-            6 * 10000
+            12 * 10000, // 1 minute
+            12 * 10000
         );
 
         return $driver;

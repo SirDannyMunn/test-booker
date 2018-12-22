@@ -22,6 +22,7 @@ class CreateProxiesTable extends Migration
             $table->json('details');
             $table->integer('user_id');
             $table->dateTime('deactivated_at')->nullable();
+            $table->dateTime('last_used');
             $table->timestamps();
         });
     }

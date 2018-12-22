@@ -6,6 +6,7 @@ use App\Browser\Browser;
 use App\Location;
 use App\Notifications\ReservationMade;
 use App\Modules\SlotManager;
+use App\Proxy;
 use App\User;
 use Carbon\Carbon;
 use Facebook\WebDriver\WebDriverBy;
@@ -27,11 +28,10 @@ class ScrapeDVSA // implements ShouldQueue
     public $timeout = 240;
     private $user;
     private $toNotify;
-
-    /**
-     * @var \Tpccdaniel\DuskSecure\Browser
-     */
+    /** @var \Tpccdaniel\DuskSecure\Browser */
     private $window;
+    /** @var Proxy */
+    private $proxy;
 
     /**
      * Create a new job instance.
@@ -55,39 +55,20 @@ class ScrapeDVSA // implements ShouldQueue
         Redis::connection('default')->funnel('ScrapeDVSA')->limit(10)->then(function () {
         Redis::connection('default')->funnel($this->user->id)->limit(1)->then(function() {
 
-            (new Browser)->browse(function ($window) {
+            (new Browser)->browse(function ($window, $proxy) {
 
                 $this->window = $window;
+                $this->proxy = $proxy;
 
                 $this->deleteIncapsulaCookies();
                 $this->login();
+
+                $this->proxy->update(['last_used' => now()->toDateTimeString()]);
+
                 $this->checkCaptcha("At Dashboard");
                 $this->goToCalendar();
                 $this->checkCaptcha("At Calendar");
-
-                // $all_slots = json_decode(file_get_contents(base_path('data/all_slots.json')), true);
-                // $slots = $all_slots[$location->name];
-
-                $slotManager = new SlotManager;
-                foreach ($this->user->locations as $location) { /* @var $location Location */
-                    $this->window->pause(rand(250,1000))
-                    ->click('#change-test-centre');
-                    $this->checkCaptcha("#change-test-centre");
-
-                    $this->window->pause(rand(250,1000))
-                    ->type('#test-centres-input', $location->name)
-                    ->pause(rand(250,1000))
-                    ->click('#test-centres-submit')
-                    ->pause(rand(250,1000));
-                    $this->checkCaptcha("#test-centres-submit");
-
-                    $this->window->clickLink(ucfirst($location->name));
-                    $this->checkCaptcha("Changed calendar location");
-
-                    $slots = $this->getSlots($location->name);
-                    $location->update(['last_checked' => now()->timestamp]);
-                    $this->toNotify->push($slotManager->getMatches($slots, $location));
-                }
+                $this->loopLocations();
 
                 if ($book=false) {
                     $this->makeBooking();
@@ -145,8 +126,7 @@ class ScrapeDVSA // implements ShouldQueue
     {
         static::$stage = $stage;
         if ($this->window->captcha()) {
-            $this->user->proxy()->update(['active' => false, 'deactivated_at' => now()]);
-            $this->window->screenshot("CAPTCHA-".now()->format('h.m.i'));
+            $this->proxy->update(['active' => false, 'deactivated_at' => now()]);
             Log::notice($this->window->captcha());
             abort(500, 'Captcha found');
         }
@@ -174,6 +154,30 @@ class ScrapeDVSA // implements ShouldQueue
             $item = $item->sortByDesc('date')->sortByDesc('user.points')[0];
             $user = $users->find($item['user']['id']);
             $user->notify(new ReservationMade($user, $item));
+        }
+    }
+
+    private function loopLocations()
+    {
+        $slotManager = new SlotManager;
+        foreach ($this->user->locations as $location) { /* @var $location Location */
+            $this->window->pause(rand(250,1000))
+                ->click('#change-test-centre');
+            $this->checkCaptcha("#change-test-centre");
+
+            $this->window->pause(rand(250,1000))
+                ->type('#test-centres-input', $location->name)
+                ->pause(rand(250,1000))
+                ->click('#test-centres-submit')
+                ->pause(rand(250,1000));
+            $this->checkCaptcha("#test-centres-submit");
+
+            $this->window->clickLink(ucfirst($location->name));
+            $this->checkCaptcha("Changed calendar location");
+
+            $slots = $this->getSlots($location->name);
+            $location->update(['last_checked' => now()->timestamp]);
+            $this->toNotify->push($slotManager->getMatches($slots, $location));
         }
     }
 
