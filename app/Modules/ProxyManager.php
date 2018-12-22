@@ -8,6 +8,8 @@
 
 namespace App\Modules;
 
+use App\Proxy;
+use App\User;
 use GuzzleHttp\Client;
 
 class ProxyManager
@@ -35,12 +37,27 @@ class ProxyManager
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'
     ];
 
-    public function getProxy($user)
+    /**
+     * @param $user
+     * @return mixed
+     */
+    public function getProxy(User $user)
     {
-//        if ($user->proxy) {
-//            return
-//        }
+        $activeProxy = $user->proxy();
 
+        if ($activeProxy) {
+            return $activeProxy;
+        }
+
+        $proxy = $this->freshProxy();
+
+        (new Proxy)->store($proxy, $user);
+
+        return $proxy;
+    }
+
+    public function freshProxy()
+    {
         $guzzle = new Client();
 
         $body = [

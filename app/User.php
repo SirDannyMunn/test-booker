@@ -45,6 +45,15 @@ class User extends Authenticatable
         return $this->belongsToMany('App\Location', 'user_location');
     }
 
+    public function proxy()
+    {
+        return $this->proxies()->where('active', 1)->get()->last();
+    }
+
+    public function proxies()
+    {
+        return $this->hasMany('App\Proxy');
+    }
 
     /**
      * @param $users Collection

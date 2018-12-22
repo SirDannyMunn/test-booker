@@ -22,10 +22,11 @@ class ScrapeDVSA // implements ShouldQueue
 {
 //    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public static $stage = 'Start';
     public $tries = 3;
     public $timeout = 240;
     private $user;
-    private $random;
+    private $toNotify;
 
     /**
      * @var \Tpccdaniel\DuskSecure\Browser
@@ -35,12 +36,12 @@ class ScrapeDVSA // implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param $user
-     * @param $random
+     * @param User $user
      */
-    public function __construct($user)
+    public function __construct(User $user)
     {
         $this->user = $user;
+        $this->toNotify = collect();
     }
 
     /**
@@ -54,44 +55,44 @@ class ScrapeDVSA // implements ShouldQueue
         Redis::connection('default')->funnel('ScrapeDVSA')->limit(10)->then(function () {
         Redis::connection('default')->funnel($this->user->id)->limit(1)->then(function() {
 
-            \Log::info($this->user->name ." - ". now()->toTimeString() ." - ". $this->random);
-
             (new Browser)->browse(function ($window) {
 
                 $this->window = $window;
 
                 $this->deleteIncapsulaCookies();
                 $this->login();
-                $this->checkCaptcha();
+                $this->checkCaptcha("At Dashboard");
                 $this->goToCalendar();
+                $this->checkCaptcha("At Calendar");
 
                 // $all_slots = json_decode(file_get_contents(base_path('data/all_slots.json')), true);
                 // $slots = $all_slots[$location->name];
 
-                $to_notify = collect();
                 $slotManager = new SlotManager;
                 foreach ($this->user->locations as $location) { /* @var $location Location */
-                    $this->window
-                    ->pause(rand(250,1000))
-                    ->click('#change-test-centre')
-                    ->pause(rand(250,1000))
+                    $this->window->pause(rand(250,1000))
+                    ->click('#change-test-centre');
+                    $this->checkCaptcha("#change-test-centre");
+
+                    $this->window->pause(rand(250,1000))
                     ->type('#test-centres-input', $location->name)
                     ->pause(rand(250,1000))
                     ->click('#test-centres-submit')
-                    ->pause(rand(250,1000))
-                    ->clickLink(ucfirst($location->name));
+                    ->pause(rand(250,1000));
+                    $this->checkCaptcha("#test-centres-submit");
+
+                    $this->window->clickLink(ucfirst($location->name));
+                    $this->checkCaptcha("Changed calendar location");
 
                     $slots = $this->getSlots($location->name);
                     $location->update(['last_checked' => now()->timestamp]);
-                    $to_notify->push($slotManager->getMatches($slots, $location));
+                    $this->toNotify->push($slotManager->getMatches($slots, $location));
                 }
 
                 if ($book=false) {
                     $this->makeBooking();
                 }
-
-                $this->sendNotifications($to_notify);
-
+                
                 $this->window->quit();
             });
 
@@ -105,6 +106,8 @@ class ScrapeDVSA // implements ShouldQueue
             \Log::info('Releasing job');
             return $this->release(10);
         });
+
+        $this->sendNotifications($this->toNotify);
     }
 
     private function deleteIncapsulaCookies()
@@ -128,9 +131,8 @@ class ScrapeDVSA // implements ShouldQueue
 
         $this->window->click('#get-started > a');
 
-        $this->checkCaptcha();
+        $this->checkCaptcha("Logging in");
 
-        $this->window->screenshot(__FUNCTION__);
         $this->window
             ->type('#driving-licence-number', decrypt($this->user->dl_number))
             ->type('#application-reference-number', decrypt($this->user->ref_number))
@@ -139,19 +141,19 @@ class ScrapeDVSA // implements ShouldQueue
         $this->window->pause(rand(250, 1000));
     }
 
-    private function checkCaptcha()
+    private function checkCaptcha($stage)
     {
+        static::$stage = $stage;
         if ($this->window->captcha()) {
-            $this->window->pause(10000)->screenshot("CAPTCHA-".now()->format('h.m.i'));
-            Log::info($this->window->captcha());
+            $this->user->proxy()->update(['active' => false, 'deactivated_at' => now()]);
+            $this->window->screenshot("CAPTCHA-".now()->format('h.m.i'));
+            Log::notice($this->window->captcha());
             abort(500, 'Captcha found');
         }
     }
 
     private function goToCalendar()
     {
-        $this->window->screenshot(__FUNCTION__);
-
         $this->window->click('#date-time-change')
             ->click('#test-choice-earliest')
             ->pause(rand(250, 1000))

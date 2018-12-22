@@ -2,11 +2,13 @@
 
 namespace App\Browser;
 
+use App\Jobs\ScrapeDVSA;
 use App\Modules\ProxyManager;
 use App\User;
 use Closure;
 use Exception;
 use Facebook\WebDriver\Remote\WebDriverCapabilityType;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 use Tpccdaniel\DuskSecure\Browser as DuskBrowser;
 use Facebook\WebDriver\Chrome\ChromeOptions;
@@ -35,10 +37,10 @@ class Browser extends BrowserInstance
         try {
             $callback($this->browser);
         } catch (Exception $e) {
-//            $filename = now()->format('y-m-d h.m i') .' '. preg_replace('/[^A-Za-z0-9 _ .-]/', ' ', $e->getMessage());
             $time = now()->format('y-m-d h.i.s');
-//            Log::alert("{$time} - dusk failed: {$e->getMessage()}");
-            $this->browser->screenshot($time);
+            $stage = ScrapeDVSA::$stage;
+            Log::alert("dusk failed at: {$stage}. Time: {$time}. Error: {$e->getMessage()}");
+            $this->browser->screenshot("{$stage} {$time}");
             throw $e;
         } catch (Throwable $e) {
             throw $e;
@@ -103,26 +105,21 @@ class Browser extends BrowserInstance
     public function getConfig()
     {
         $user = User::find(User::all()->count());
-//        $proxy = (new ProxyManager)->getProxy($user);
 
-        $capabilities = DesiredCapabilities::chrome();
-        $capabilities->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true);
-        $capabilities->setCapability(ChromeOptions::CAPABILITY, (new ChromeOptions)->addArguments([
+        $proxy = (new ProxyManager)->getProxy($user);
+        $url = "{$proxy['ip']}:{$proxy['port']}";
+
+        return DesiredCapabilities::chrome()
+                        ->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true)
+                        ->setCapability(ChromeOptions::CAPABILITY, (new ChromeOptions)->addArguments([
             '--disable-gpu',
             '--headless',
             '--ignore-certificate-errors',
 //            "--user-agent={$proxy['randomUserAgent']}"
-        ]));
-
-//        $url = "{$proxy['ip']}:{$proxy['port']}";
-        $url = "45.115.175.8:55464";
-//        $url = "51.75.109.93:3128";
-//        $url = "74.82.238.69:43053";
-        $capabilities->setCapability(WebDriverCapabilityType::PROXY,
-            ['proxyType' => 'manual', 'httpProxy' => $url, 'sslProxy' => $url, 'ftpProxy' => $url]
-        );
-
-        return $capabilities;
+        ]))
+                        ->setCapability(WebDriverCapabilityType::PROXY, [
+            'proxyType' => 'manual', 'httpProxy' => $url, 'sslProxy' => $url, 'ftpProxy' => $url
+        ]);
     }
 
     /**

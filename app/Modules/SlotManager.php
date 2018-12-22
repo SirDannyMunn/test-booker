@@ -9,6 +9,8 @@
 namespace App\Modules;
 
 
+use Carbon\Carbon;
+
 class SlotManager
 {
     /**
