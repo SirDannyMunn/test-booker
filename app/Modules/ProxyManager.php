@@ -43,20 +43,18 @@ class ProxyManager
      */
     public function getProxy(User $user)
     {
-        $activeProxy = Proxy::where('active', true)->whereDate('last_used', '<', now()->subMinutes(1)->toDateTimeString())->get();
+        $activeProxy = Proxy::where('active', true)->where('last_used', '<', now()->subMinutes(rand(8, 10))->toDateTimeString())->get();
 
         if (filled($activeProxy)) {
             return $activeProxy->random();
         }
 
-        $proxy = $this->freshProxy();
+        $proxy = $this->newProxy();
 
-        (new Proxy)->store($proxy, $user);
-
-        return $proxy;
+        return (new Proxy)->store($proxy, $user);
     }
 
-    public function freshProxy()
+    public function newProxy()
     {
         $guzzle = new Client();
 
@@ -64,7 +62,7 @@ class ProxyManager
             'query' => [
                 'apiKey' => 'Rr6QBHMTmVwpzfGJt3nYhvgqcdAb75KP',
                 "connectionType" => "Residential",
-//                "referer" => false,
+                "referer" => false,
 //                "country" => "GB"
             ]
         ];

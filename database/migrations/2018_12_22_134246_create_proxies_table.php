@@ -16,9 +16,9 @@ class CreateProxiesTable extends Migration
         Schema::create('proxies', function (Blueprint $table) {
             $table->increments('id');
             $table->boolean('active')->default(true);
+            $table->string('fails')->default(0);
+            $table->string('completed')->default(0);
             $table->string('proxy');
-            $table->string('ip');
-            $table->string('port');
             $table->json('details');
             $table->integer('user_id');
             $table->dateTime('deactivated_at')->nullable();

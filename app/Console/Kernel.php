@@ -27,36 +27,36 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-//        $schedule->command('horizon:snapshot')->everyMinute();
-//
-//        $users = User::where('booked', false)
-//        ->whereDate('test_date', '>', now()->endOfDay()->addWeekdays(3))
-//        ->get();
-//
-//        if (!filled($users)) {
-//            Log::notice('No Users - '.now()->toDateTimeString()); return;
-//        }
-//
-//        // allowed visits per hour split between people and limited to >= 1
+        $schedule->command('horizon:snapshot')->everyMinute();
+
+        $users = User::where('booked', false)
+        ->whereDate('test_date', '>', now()->endOfDay()->addWeekdays(3))
+        ->get();
+
+        if (!filled($users)) {
+            Log::notice('No Users - '.now()->toDateTimeString()); return;
+        }
+
+        // allowed visits per hour split between people and limited to >= 1
 //        $frequency = round( 60 / (315 / count($users) ) - 0.499 ) ?: 1;
-//        $frequency = 2;
-//
-//        $users->load(['locations' => function($location) use ($frequency) {
-//            return $location->where('last_checked', '<', now()->subMinutes($frequency)->timestamp);
-//        }]);
-//
-//        $schedule->call(function() use ($users) {
-//            $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
-//            $best_users = (new User)->getBest($users, $locations);
-//
-//            $random = str_random(3);
-//
-//            foreach ($best_users as $user) {
-//                ScrapeDVSA::dispatch($user, $random)->onConnection('redis');
-//            }
-//        })->cron("*/{$frequency} * * * *")
-//            ->name('DVSA')
-//            ->withoutOverlapping();
+        $frequency = 2;
+
+        $users->load(['locations' => function($location) use ($frequency) {
+            return $location->where('last_checked', '<', now()->subMinutes($frequency)->timestamp);
+        }]);
+
+        $schedule->call(function() use ($users) {
+            $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
+            $best_users = (new User)->getBest($users, $locations);
+
+            foreach ($best_users as $user) {
+                rescue(function () use ($user) {
+                    ScrapeDVSA::dispatch($user)->onConnection('redis');
+                });
+            }
+        })->cron("*/{$frequency} * * * *")
+            ->name('DVSA')
+            ->withoutOverlapping();
 //          ->unlessBetween('23:00', '6:00');
     }
 

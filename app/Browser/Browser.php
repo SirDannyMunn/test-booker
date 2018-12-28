@@ -41,8 +41,9 @@ class Browser extends BrowserInstance
         } catch (Exception $e) {
             $time = now()->format('y-m-d h.i.s');
             $stage = ScrapeDVSA::$stage;
-            Log::alert("dusk failed at: {$stage}. Time: {$time}. Error: {$e->getMessage()}");
-            $this->browser->screenshot("{$stage} {$time}");
+            $logContext = ['proxy'=>$this->proxy->proxy,'time'=>$time,'error'=>$e->getMessage()];
+            Log::alert("dusk failed at: {$stage}", $logContext);
+            $this->browser->screenshot("{$time} {$stage}");
             throw $e;
         } catch (Throwable $e) {
             throw $e;
@@ -91,8 +92,6 @@ class Browser extends BrowserInstance
     public function prepare()
     {
         $chrome_log_path = storage_path('logs/chromedriver.log');
-        exec('rm -r '.$chrome_log_path);
-//        exec('rm -r '.storage_path('logs/laravel-'.now()->format('Y-m-d').'.log'));
 
         static::startChromeDriver([
             '--verbose',

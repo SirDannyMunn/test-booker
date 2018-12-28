@@ -16,20 +16,21 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
-class ScrapeDVSA // implements ShouldQueue
+class ScrapeDVSA implements ShouldQueue
 {
-//    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public static $stage = 'Start';
     public $tries = 3;
     public $timeout = 240;
     private $user;
     private $toNotify;
+
     /** @var \Tpccdaniel\DuskSecure\Browser */
     private $window;
+
     /** @var Proxy */
     private $proxy;
 
@@ -44,6 +45,19 @@ class ScrapeDVSA // implements ShouldQueue
         $this->toNotify = collect();
     }
 
+    private function checkPage($stage)
+    {
+        static::$stage = $stage;
+        $captcha = $this->window->captcha();
+        $body = $this->window->html('body');
+
+        if (!$captcha && $body != '') return;
+
+        $this->proxy->failed();
+
+        abort(500, $captcha ? 'Captcha found' : 'Blank Response');
+    }
+
     /**
      * Execute the job.
      *
@@ -53,7 +67,7 @@ class ScrapeDVSA // implements ShouldQueue
     public function handle()
     {
         Redis::connection('default')->funnel('ScrapeDVSA')->limit(10)->then(function () {
-        Redis::connection('default')->funnel($this->user->id)->limit(1)->then(function() {
+        Redis::connection('default')->funnel($this->user->dl_number)->limit(1)->then(function() {
 
             (new Browser)->browse(function ($window, $proxy) {
 
@@ -65,9 +79,9 @@ class ScrapeDVSA // implements ShouldQueue
 
                 $this->proxy->update(['last_used' => now()->toDateTimeString()]);
 
-                $this->checkCaptcha("At Dashboard");
+                $this->checkPage("At Dashboard");
                 $this->goToCalendar();
-                $this->checkCaptcha("At Calendar");
+                $this->checkPage("At Calendar");
                 $this->loopLocations();
 
                 if ($book=false) {
@@ -77,16 +91,18 @@ class ScrapeDVSA // implements ShouldQueue
                 $this->window->quit();
             });
 
-        }, function () {
+            }, function () {
 
-            \Log::info('Releasing user');
-            return $this->release(10);
-        });
+                \Log::info('Releasing user');
+                return $this->release(30);
+            });
         }, function () {
 
             \Log::info('Releasing job');
-            return $this->release(10);
+            return $this->release(30);
         });
+
+        $this->proxy->update(['completed' => $this->proxy->completed + 1, 'fails' => 0]);
 
         $this->sendNotifications($this->toNotify);
     }
@@ -107,12 +123,11 @@ class ScrapeDVSA // implements ShouldQueue
         $url = 'https://www.gov.uk/change-driving-test';
         $this->window->visit($url);
 
-//        if (rand(0,1))
-//            $this->window->back()->visit($url);
+        $this->checkPage("Accessing site");
 
         $this->window->click('#get-started > a');
 
-        $this->checkCaptcha("Logging in");
+        $this->checkPage("Logging in");
 
         $this->window
             ->type('#driving-licence-number', decrypt($this->user->dl_number))
@@ -120,16 +135,6 @@ class ScrapeDVSA // implements ShouldQueue
             ->click('#booking-login');
 
         $this->window->pause(rand(250, 1000));
-    }
-
-    private function checkCaptcha($stage)
-    {
-        static::$stage = $stage;
-        if ($this->window->captcha()) {
-            $this->proxy->update(['active' => false, 'deactivated_at' => now()]);
-            Log::notice($this->window->captcha());
-            abort(500, 'Captcha found');
-        }
     }
 
     private function goToCalendar()
@@ -163,17 +168,17 @@ class ScrapeDVSA // implements ShouldQueue
         foreach ($this->user->locations as $location) { /* @var $location Location */
             $this->window->pause(rand(250,1000))
                 ->click('#change-test-centre');
-            $this->checkCaptcha("#change-test-centre");
+            $this->checkPage("#change-test-centre");
 
-            $this->window->pause(rand(250,1000))
+            $this->window->pause(rand(1000,2000))
                 ->type('#test-centres-input', $location->name)
-                ->pause(rand(250,1000))
+                ->pause(rand(1000,2000))
                 ->click('#test-centres-submit')
-                ->pause(rand(250,1000));
-            $this->checkCaptcha("#test-centres-submit");
+                ->pause(rand(1000,2000));
+            $this->checkPage("#test-centres-submit");
 
             $this->window->clickLink(ucfirst($location->name));
-            $this->checkCaptcha("Changed calendar location");
+            $this->checkPage("Changed calendar location");
 
             $slots = $this->getSlots($location->name);
             $location->update(['last_checked' => now()->timestamp]);

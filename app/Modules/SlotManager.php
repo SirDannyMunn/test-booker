@@ -8,8 +8,8 @@
 
 namespace App\Modules;
 
-
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class SlotManager
 {
@@ -55,6 +55,8 @@ class SlotManager
                 return ['id' => $key, 'points' => $value];
             })->values();
 
+            if (!filled($user_points)) return [];
+
             // Select user by index of current date within sorted $user_points array.
             $user = $user_points[$eligible_candidates->keys()->search($date)];
 
@@ -62,7 +64,7 @@ class SlotManager
             return ['user' => $user,
                 'date' => $date,
                 'location' => $location->name];
-        })->values();
+        })->values()->filter();
 
         return $matched_slots;
     }
