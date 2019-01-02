@@ -1,38 +1,30 @@
-<?php
+<?php 
 
-namespace App\Browser\Pages;
+namespace App\Modules;
 
-use Tpccdaniel\DuskSecure\Page as BasePage;
+use App\Location;
+use Carbon\Carbon;
+use App\Modules\SlotManager;
+use Facebook\WebDriver\WebDriverBy;
+use App\Notifications\ReservationMade;
 
-abstract class Page extends BasePage
+trait InteractsWithDVSA
 {
-    /**
-     * Get the global element shortcuts for the site.
-     *
-     * @return array
-     */
-    public static function siteElements()
-    {
-        return [
-            '@element' => '#selector',
-        ];
-    }
-
-    public function checkPage($stage)
+    protected function checkPage($stage)
     {
         static::$stage = $stage;
 
         $captcha = $this->window->captcha();
-        $body = $this->window->html('body');
+        $body = $this->window->html('body')[0];
 
         if (!$captcha && $body != '') return;
 
-        $this->proxy->failed();
+        $this->proxy->failed($body);
 
         abort(500, $captcha ? 'Captcha found' : 'Blank Response');
     }
 
-    public function deleteIncapsulaCookies()
+    protected function deleteIncapsulaCookies()
     {
         $incapsula_cookies = array_where(array_pluck((array)$this->window->getCookies(), 'name'), function ($cookie) {
             return str_contains($cookie, 'incap');
@@ -43,7 +35,7 @@ abstract class Page extends BasePage
         }
     }
 
-    public function login()
+    protected function login()
     {
         $url = 'https://www.gov.uk/change-driving-test';
         $this->window->visit($url);
@@ -54,13 +46,13 @@ abstract class Page extends BasePage
         $this->window->pause(rand(250, 1000));
     }
 
-    public function goToCalendar()
+    protected function goToCalendar()
     {
         $this->window->click('#date-time-change')->click('#test-choice-earliest')->pause(rand(250, 1000))->click('#driving-licence-submit')->pause(rand(250, 1000));
     }
 
     /** * @param $to_notify Collection */
-    public function sendNotifications($to_notify)
+    protected function sendNotifications($to_notify)
     {
         $users = User::all();
         foreach ($to_notify->collapse()->groupBy('user.id') as $item) { /* @var $user User*/ /* @var $item Collection * collection of users and slots, ranked and sorted to acquire best match */ $item = $item->sortByDesc('date')->sortByDesc('user.points')[0];
@@ -69,7 +61,7 @@ abstract class Page extends BasePage
         }
     }
 
-    public function loopLocations()
+    protected function loopLocations()
     {
         $slotManager = new SlotManager;
         foreach ($this->user->locations as $location) { /* @var $location Location */ $this->window->pause(rand(250, 1000))->click('#change-test-centre');
@@ -95,6 +87,7 @@ abstract class Page extends BasePage
             $slot = Carbon::parse($string)->toDateTimeString();
             array_push($slots[$location], $slot);
         }
+
         return array_values($slots);
     }
 }

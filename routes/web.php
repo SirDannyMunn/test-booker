@@ -1,9 +1,17 @@
 <?php
 
 Route::get('/test', function () {
+    
+    
+    // (new \App\Jobs\ScrapeDVSA(\App\User::find(\App\User::all()->count())))->handle();
+    // return phpinfo();
+    
+    $window = cache("46.219.77.3:48503");
 
-    (new \App\Jobs\ScrapeDVSA(\App\User::find(\App\User::all()->count())))->handle();
-    return 'success';
+    $window->visit('https://google.com');
+
+    dd($window);
+
 //     \Illuminate\Support\Facades\Artisan::call('check:ip');
 
 //    (new \App\Jobs\ScrapeDVSA(\App\User::find(1)))->handle();

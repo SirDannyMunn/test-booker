@@ -12,7 +12,7 @@ class FlushRedis extends Command
      *
      * @var string
      */
-    protected $signature = 'redis:flush {connection=default}';
+    protected $signature = 'redis:flush {connection=default} {--run}';
 
     /**
      * The console command description.
@@ -44,5 +44,9 @@ class FlushRedis extends Command
         Redis::connection($this->argument('connection'))->flushall();
         $this->line('Flushed.');
         $this->line(\Illuminate\Support\Facades\Redis::connection('default')->dbsize());
+
+        if ($this->option('run')) {
+            $this->call('horizon');
+        }
     }
 }

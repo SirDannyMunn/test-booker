@@ -38,7 +38,7 @@ class Kernel extends ConsoleKernel
         }
 
         // allowed visits per hour split between people and limited to >= 1
-//        $frequency = round( 60 / (315 / count($users) ) - 0.499 ) ?: 1;
+        $frequency = round( 60 / (315 / count($users) ) - 0.499 ) ?: 2;
         $frequency = 2;
 
         $users->load(['locations' => function($location) use ($frequency) {
@@ -58,6 +58,8 @@ class Kernel extends ConsoleKernel
             ->name('DVSA')
             ->withoutOverlapping();
 //          ->unlessBetween('23:00', '6:00');
+
+        $schedule->call('refresh:windows')
     }
 
     /**
