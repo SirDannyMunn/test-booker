@@ -13,46 +13,22 @@ class ReservationMade extends Notification
 {
     use Queueable;
 
-    /**
-     * @var User
-     */
     protected $user;
-    /**
-     * @var string
-     */
     protected $date;
-    /**
-     * @var
-     */
     protected $location;
-    /**
-     * @var string
-     */
     protected $actionCode;
 
-    /**
-     * Create a new notification instance.
-     *
-     * @param $user
-     * @param $data
-     */
-    public function __construct($user, $data)
+    public function __construct($user, $slot)
     {
         $this->user = $user;
-        $this->location = $data['location'];
-        $this->date = Carbon::parse($data['date'])->format('d/m/y h:m');
-        $this->actionCode = str_random(10);
+        $this->location = $slot['location'];
+        $this->date = Carbon::parse($slot['date'])->format('d/m/y h:m');
+        $this->actionCode = uniqid() . str_random(10);
 
         $this->user->action_code = $this->actionCode;
         $this->user->save();
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @param  mixed  $notifiable
-     * @return array
-     */
     public function via($notifiable)
     {
         if ($this->user->contact_preference == 'sms')
@@ -61,11 +37,6 @@ class ReservationMade extends Notification
         return ['mail'];
     }
 
-
-    /**
-     * @param $notifiable
-     * @return NexmoMessage
-     */
     public function toNexmo($notifiable)
     {
         return (new NexmoMessage)
@@ -73,13 +44,6 @@ class ReservationMade extends Notification
             ->from(env('NEXMO_FROM'));
     }
 
-
-    /**
-     * Get the mail representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
-     */
     public function toMail($notifiable)
     {
         $test_date = Carbon::parse($this->user->test_date)->format('d/m/y h:m');

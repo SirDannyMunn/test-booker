@@ -13,3 +13,4 @@ npm-debug.log
 yarn-error.log
 .env
 .phpunit.result.cache
+database/migrations/2018_11_29_132309_create_jobs_table.php

@@ -10,6 +10,7 @@ use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriverBy;
 use Illuminate\Console\Command;
 use App\Browser\Browser;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class DVSACheck
@@ -35,12 +36,13 @@ class DVSACheck extends Command
      * @var \Tpccdaniel\DuskSecure\Browser
      */
     protected $browser;
-    protected $users;
 
     /**
      * @var \Tpccdaniel\DuskSecure\Browser
      */
     protected $window;
+
+    protected $users;
 
     /**
      * Create a new command instance.
@@ -52,6 +54,10 @@ class DVSACheck extends Command
         parent::__construct();
 
         $this->browser = $browser;
+
+        $test = new Browser;
+
+        return 'test';
     }
 
     /**
@@ -73,45 +79,57 @@ class DVSACheck extends Command
 
             $this->window = $browser;
 
-//            $this->window->deleteCookies();
+            $incapsula_cookies = array_where(array_pluck($this->window->getCookies(), 'name'), function ($cookie) {
+                return str_contains($cookie, 'incap');
+            });
+
+            if ($incapsula_cookies) {
+                foreach ($incapsula_cookies as $cookie) {
+                    $this->window->deleteCookie($cookie);
+                }
+            }
+
             // Login
-//            $this->window->visit('https://www.gov.uk/change-driving-test')
-//                    ->clickLink('Start now')
-//                    ->type('#driving-licence-number', $data['username'])
-//                    ->type('#application-reference-number', $data['password'])
-//                    ->click('#booking-login');
-//
-//            $this->window->pause(rand(0,1000));
-
+            $this->window->visit('https://www.gov.uk/change-driving-test');
+            $this->window->screenshot('Home');
+            $this->window->clickLink('Start now');
+            $this->window->screenshot('Login Page');
             // Handle captcha
-//            $captcha = $this->window->checkPresent('recaptcha_challenge_image');
-//            if ($captcha) {
-//                // Do something
-//                $this->window->screenshot("CAPTCHA-".now());
-//                $this->line('FAILED - CAPTCHA FOUND');
-//            }
+            if ($this->window->captcha()) {
+                $this->window->pause(10000)->screenshot("CAPTCHA-".now()->format('h.m.i'));
+                Log::info($this->window->captcha());
+                return;
+            }
 
-//            $this->window->click('#date-time-change');
-//            $this->window->click('#test-choice-earliest');
-//            $this->window->pause(rand(0,1000));
-//            $this->window->click('#driving-licence-submit');
-//            $this->window->pause(rand(0,1000));
+            Log::info($this->window->html('body')[0]);
 
-            $all_slots = json_decode(file_get_contents(base_path('app/Browser/slots.json')), true);
+            $this->window->type('#driving-licence-number', $data['username']);
+            $this->window->type('#application-reference-number', $data['password']);
+            $this->window->click('#booking-login');
+
+            $this->window->pause(rand(250, 1000));
+
+            $this->window->click('#date-time-change')
+                         ->click('#test-choice-earliest')
+                         ->pause(rand(250, 1000))
+                         ->click('#driving-licence-submit')
+                         ->pause(rand(250, 1000));
+
+//            $all_slots = json_decode(file_get_contents(base_path('data/all_slots.json')), true);
             $to_notify = collect();
             foreach ($locations as $location) {
-                // Breakage happening here
-//                $this->window->pause(rand(250,1000));
-//                $this->window->click('#change-test-centre');
-//                $this->window->pause(rand(250,1000));
-//                $this->window->type('#test-centres-input', $location->name);
-//                $this->window->pause(rand(250,1000));
-//                $this->window->click('#test-centres-submit');
-//                $this->window->pause(rand(250,1000));
-//                $this->window->clickLink(ucfirst($location->name));
-//                $slots = $this->scrapeSlots($location->name);
+                $this->window->pause(rand(250,1000))
+                             ->click('#change-test-centre')
+                             ->pause(rand(250,1000))
+                             ->type('#test-centres-input', $location->name)
+                             ->pause(rand(250,1000))
+                             ->click('#test-centres-submit')
+                             ->pause(rand(250,1000))
+                             ->clickLink(ucfirst($location->name));
+
+                $slots = $this->scrapeSlots($location->name);
                 $location->update(['last_checked' => now()->timestamp]);
-                $to_notify->push($this->getScores($all_slots[$location->name], $location));
+                $to_notify->push($this->getScores($slots, $location));
             }
 
             $this->line('Sending emails...');
@@ -129,22 +147,23 @@ class DVSACheck extends Command
     }
 
     /**
+     * @param $location
      * @return array
      */
     public function scrapeSlots($location)
     {
         $slots = [];
         $slots[$location] = [];
-        foreach (array_slice($this->window->elements('.SlotPicker-slot-label'), 10) as $element) {
-            /** @var $element RemoteWebElement */
+        foreach (array_slice($this->window->elements('.SlotPicker-slot-label'), 10) as $element) { /** @var $element RemoteWebElement */
             $string = $element->findElement(
                 WebDriverBy::className('SlotPicker-slot')
             )->getAttribute('data-datetime-label');
 
-            $date = Carbon::parse(substr($string, 0, strrpos($string, ' ')))->toDateString();
+            $slot = Carbon::parse($string)->toDateTimeString();
 
-            array_push($slots[$location], $date);
+            array_push($slots[$location], $slot);
         }
+
         return array_values($slots);
     }
 
@@ -161,7 +180,7 @@ class DVSACheck extends Command
         );
 
         $user_points = [];
-        foreach ($slots as $slot) {
+        foreach ($slots[0] as $slot) {
             $user_points[$slot] = [];
             foreach ($users as $user) {
                 $id = $user->id;
@@ -208,30 +227,6 @@ class DVSACheck extends Command
         });
 
         return collect(array_slice($user_points, 0, count($eligible_candidates)));
-    }
-
-    /**
-     * @param $slots
-     * @param $location
-     * @return array
-     */
-    public function handleData($slots, $location)
-    {
-
-//        $slots = $eligible_candidates->map(function ($names, $date) {
-//            return ['date' => $date, 'users' => collect($names)->filter()->sort()->map(function ($value, $key) {
-//                return ['id' => $key, 'points' => $value];
-//            })->values()];
-//        })->values();
-
-        // Send notifications
-//        foreach ($slots as $key => $slot) {
-//            $user = User::find($slot['users'][$key]['id']);
-//            $user->notify(new ReservationMade($user, $slot['date']));
-            // Also make event for 15 minutes to give check if taken, if not give to next best candidate
-//        }
-
-        return $slots;
     }
 
     /**

@@ -4,6 +4,7 @@ return [
 
     'default' => env('DB_CONNECTION', 'mysql'),
 
+    // Database connections
     'connections' => [
         'mysql' => [
             'driver' => 'mysql',
@@ -20,32 +21,31 @@ return [
             'strict' => true,
             'engine' => null,
         ],
+
         'redis' => [
             'driver' => 'redis',
-            'connection' => 'default',
+            'connection' => 'redis',
             'queue' => '{default}',
             'retry_after' => 90,
+            'block_for' => 5,
         ],
     ],
 
     'migrations' => 'migrations',
 
-    /*
-    |--------------------------------------------------------------------------
-    | Redis Databases
-    |--------------------------------------------------------------------------
-    |
-    | Redis is an open source, fast, and advanced key-value store that also
-    | provides a richer set of commands than a typical key-value systems
-    | such as APC or Memcached. Laravel makes it easy to dig right in.
-    |
-    */
-
+    // Specific redis connections
     'redis' => [
 
         'client' => 'predis',
 
         'default' => [
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT', 6379),
+            'database' => env('REDIS_DB', 0),
+        ],
+
+        'scraper' => [
             'host' => env('REDIS_HOST', '127.0.0.1'),
             'password' => env('REDIS_PASSWORD', null),
             'port' => env('REDIS_PORT', 6379),

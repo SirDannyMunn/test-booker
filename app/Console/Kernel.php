@@ -2,12 +2,11 @@
 
 namespace App\Console;
 
-use App\Http\Controllers\DVSAController;
-use App\Location;
+use App\Jobs\ScrapeDVSA;
 use App\User;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
@@ -28,25 +27,41 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->call(function() {
-        //     $users = User::where('booked', false)->with(['locations' => function($location) {
-        //         return $location->where('last_checked', '<', now()->subMinutes(5)->timestamp);
-        //     }])->get();
+        $schedule->command('horizon:snapshot')->everyMinute();
+            
+        $users = User::where('booked', false)->with(['locations' => function($location) {
+            return $location->where('last_checked', '<', now()->subMinutes(5)->timestamp);
+        }])->get();
 
-            // Get best users to use for scraping - ensuring to include all locations.
-//            $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
-//            $best_users = (new User)->getBest($users, $locations);
+        if (!filled($users)) {
+            Log::notice('No Users - '.now()->toDateTimeString()); return;
+        }
 
-            // send to process with delay if necessary.
-//            (new DVSAController)->access();
-                // Artisan::call('dvsa:access');
+        // allowed visits per hour split between people and limited to >= 1
+        $frequency = round( 60 / (315 / count($users) ) - 0.499 ) ?: 2;
+        $frequency = 2;
 
-//            Artisan::queue('dvsa:access')->delay(now()->addMinutes(rand(0,3)));
+        $users->load(['locations' => function($location) use ($frequency) {
+            return $location->where('last_checked', '<', now()->subMinutes($frequency)->timestamp);
+        }]);
 
-            // Add each scrape task to queue
-        // })->everyTenMinutes()->emailOutputTo('danielmunn@outlook.com');
+        $schedule->call(function() use ($users) {
+            $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
+            $best_users = (new User)->getBest($users, $locations);
 
-//        Artisan::call('dvsa:access', ['--getslot'=>1, 'user'=>1]);
+            foreach ($best_users as $user) {
+                rescue(function () use ($user) {
+                    ScrapeDVSA::dispatch($user)->onConnection('redis');
+                });
+            }
+        })->cron("*/{$frequency} * * * *")
+            ->name('DVSA')
+            ->withoutOverlapping();
+//          ->unlessBetween('23:00', '6:00');
+
+        // $schedule->call('refresh:windows')
+        // ->cron("*/2 * * * *");
+        // ->everyFiveMinutes();
     }
 
     /**

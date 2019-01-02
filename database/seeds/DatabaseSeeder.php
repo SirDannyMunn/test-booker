@@ -11,18 +11,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-//        $locations = factory(App\Location::class, 30)->create();
-
         $locations = collect();
         foreach (['Skipton', 'Blackburn', 'Preston', 'Nelson', 'halifax'] as $place) {
             $locations->push(factory(App\Location::class)->create(['name' => $place]));
         }
 
-        for($i=0; $i<10; $i++) {
+        for($i=0; $i<rand(1, 10); $i++) {
 
             $user_locations = $locations->random(rand(1,5));
 
-            $user = factory(App\User::class)->create(['location' => $user_locations[0]->name]);
+            $user = factory(App\User::class, $i==0 ? 'admin' : null)->create(['location' => $user_locations[0]->name]);
 
             foreach ($user_locations as $user_location) {
 
@@ -31,7 +29,5 @@ class DatabaseSeeder extends Seeder
                 );
             }
         }
-
-        factory(App\User::class, 'admin')->create();
     }
 }

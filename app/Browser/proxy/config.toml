@@ -1,0 +1,37 @@
+debug = true
+
+dont_verify_crawlera_cert = false
+
+no_auto_sessions = true
+
+concurrent_connections = 10
+
+bind_port = 3128
+bind_ip = "localhost"
+
+proxy_api_ip = ""
+proxy_api_port = 3130
+
+crawlera_port = 8010
+crawlera_host = "proxy.crawlera.com"
+api_key = "accb2a6ad600495b917187f2873558ec"
+
+tls_ca_certificate = "/home/vagrant/Dev/laravel-web-crawler/app/Browser/proxy/ca.crt"
+tls_private_key = "/home/vagrant/Dev/laravel-web-crawler/app/Browser/proxy/proxy-private-key.pem"
+
+adblock_lists = [
+  "https://easylist.to/easylist/easylist.txt",
+#  "https://easylist.to/easylist/easyprivacy.txt",
+#  "https://fanboy.co.nz/r/fanboy-ultimate.txt",
+#  "https://fanboy.co.nz/fanboy-antifonts.txt",
+#  "https://fanboy.co.nz/fanboy-antifacebook.txt",
+#  "https://s3.amazonaws.com/lists.disconnect.me/simple_malware.txt",
+  "/home/vagrant/Dev/laravel-web-crawler/app/Browser/proxy/adblock_list.txt"
+]
+
+[xheaders]
+cookies = "disable"
+#session = "create"
+timeout = "40000"
+#au = "desktop"
+#profile = "pass"
