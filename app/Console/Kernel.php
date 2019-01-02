@@ -28,10 +28,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->call(function() {
-            $users = User::where('booked', false)->with(['locations' => function($location) {
-                return $location->where('last_checked', '<', now()->subMinutes(5)->timestamp);
-            }])->get();
+        // $schedule->call(function() {
+        //     $users = User::where('booked', false)->with(['locations' => function($location) {
+        //         return $location->where('last_checked', '<', now()->subMinutes(5)->timestamp);
+        //     }])->get();
 
             // Get best users to use for scraping - ensuring to include all locations.
 //            $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
@@ -39,12 +39,12 @@ class Kernel extends ConsoleKernel
 
             // send to process with delay if necessary.
 //            (new DVSAController)->access();
-                Artisan::call('dvsa:access');
+                // Artisan::call('dvsa:access');
 
 //            Artisan::queue('dvsa:access')->delay(now()->addMinutes(rand(0,3)));
 
             // Add each scrape task to queue
-        })->everyTenMinutes()->emailOutputTo('danielmunn@outlook.com');
+        // })->everyTenMinutes()->emailOutputTo('danielmunn@outlook.com');
 
 //        Artisan::call('dvsa:access', ['--getslot'=>1, 'user'=>1]);
     }
