@@ -1,16 +1,24 @@
 <?php
 
+use App\Browser\Browser;
+
 Route::get('/test', function () {
     
     
-    // (new \App\Jobs\ScrapeDVSA(\App\User::find(\App\User::all()->count())))->handle();
-    // return phpinfo();
+    (new \App\Jobs\ScrapeDVSA(\App\User::find(\App\User::all()->count())))->handle();
+    return 'success';
     
-    $window = cache("46.219.77.3:48503");
+    // $sessionID = null;
+    // $sessionID = cache('session');
+    // (new Browser)->browse(function ($window, $proxy) use ($sessionID) {
+                
+    //     $window->visit('https://google.com');
+        
+    //     cache(['session' => $window->driver->getSessionID()], 60);
 
-    $window->visit('https://google.com');
+    //     $window->screenshot($sessionID);
+    // }, $sessionID);
 
-    dd($window);
 
 //     \Illuminate\Support\Facades\Artisan::call('check:ip');
 

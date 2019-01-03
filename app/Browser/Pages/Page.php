@@ -54,7 +54,7 @@ abstract class Page extends BasePage
         $this->window->pause(rand(250, 1000));
     }
 
-    public function goToCalendar()
+    public function changeTestDate()
     {
         $this->window->click('#date-time-change')->click('#test-choice-earliest')->pause(rand(250, 1000))->click('#driving-licence-submit')->pause(rand(250, 1000));
     }

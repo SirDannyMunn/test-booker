@@ -59,7 +59,13 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping();
 //          ->unlessBetween('23:00', '6:00');
 
-        $schedule->call('refresh:windows')
+        $schedule->call(function() {
+            $yesterday = today()->subDay();
+            $proxies = Proxy::whereBetween("created_at", [$yesterday->startOfDay(), $yesterday->endOfDay()])->get();
+            // Email to me
+        })->dailyAt("9:00");        
+
+        // $schedule->call('refresh:windows')->cron("*/29 * * * *");
     }
 
     /**

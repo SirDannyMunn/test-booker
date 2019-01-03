@@ -28,12 +28,18 @@ class Browser extends BrowserInstance
 
     protected $proxy;
 
+    protected $existingSession;
+
     /**
      * @param Closure $callback
      * @throws Throwable
      */
-    public function browse(Closure $callback)
+    public function browse(Closure $callback, $existingSession = null)
     {
+        if ($existingSession) {
+            $this->existingSession = $existingSession;
+        }
+
         $this->prepare();
 
         try {
@@ -41,7 +47,7 @@ class Browser extends BrowserInstance
         } catch (Exception $e) {
             $time = now()->format('y-m-d h.i.s');
             $stage = ScrapeDVSA::$stage;
-            $logContext = ['proxy'=>$this->proxy->proxy,'time'=>$time,'error'=>$e->getMessage()];
+            $logContext = ['proxy' => $this->proxy->proxy, 'time' => $time, 'error' => $e->getMessage()];
             Log::alert("dusk failed at: {$stage}", $logContext);
             $this->browser->screenshot("{$time} {$stage}");
             throw $e;
@@ -102,7 +108,7 @@ class Browser extends BrowserInstance
             $this->browser = $this->newBrowser($this->createWebDriver());
         }
     }
-    
+
     public function getConfig()
     {
         $user = User::find(User::all()->count());
@@ -111,16 +117,16 @@ class Browser extends BrowserInstance
         $url = $this->proxy->proxy;
 
         return DesiredCapabilities::chrome()
-                        ->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true)
-                        ->setCapability(ChromeOptions::CAPABILITY, (new ChromeOptions)->addArguments([
-            '--disable-gpu',
-            '--headless',
-            '--ignore-certificate-errors',
+            ->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true)
+            ->setCapability(ChromeOptions::CAPABILITY, (new ChromeOptions)->addArguments([
+                '--disable-gpu',
+                '--headless',
+                '--ignore-certificate-errors',
 //            "--user-agent={$proxy['randomUserAgent']}"
-        ]))
-                        ->setCapability(WebDriverCapabilityType::PROXY, [
-            'proxyType' => 'manual', 'httpProxy' => $url, 'sslProxy' => $url, 'ftpProxy' => $url
-        ]);
+            ]))
+            ->setCapability(WebDriverCapabilityType::PROXY, [
+                'proxyType' => 'manual', 'httpProxy' => $url, 'sslProxy' => $url, 'ftpProxy' => $url
+            ]);
     }
 
     /**
@@ -130,22 +136,22 @@ class Browser extends BrowserInstance
     {
         $capabilities = $this->getConfig();
 
-        $driver = RemoteWebDriver::create(
-            'http://127.0.0.1:9515', $capabilities,
-            12 * 10000, // 1 minute
-            12 * 10000
-        );
+        $timeout = 6 * 10000; // 1 minute
 
-        return $driver;
-    }
-
-    /**
-     * @throws Exception
-     */
-    function __destruct()
-    {
-        if ($this->browser) {
-            $this->closeBrowser();
+        if ($this->existingSession) {
+            return RemoteWebDriver::createBySessionId($this->existingSession, "http://127.0.0.1:9515");
         }
+
+        return RemoteWebDriver::create('http://127.0.0.1:9515', $capabilities, $timeout, $timeout);
     }
+
+    // /**
+    //  * @throws Exception
+    //  */
+    // function __destruct()
+    // {
+    //     if ($this->browser) {
+    //         $this->closeBrowser();
+    //     }
+    // }
 }

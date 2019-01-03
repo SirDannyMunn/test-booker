@@ -1,15 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: danie
- * Date: 15/12/2018
- * Time: 14:35
- */
 
 namespace App\Modules;
 
+use App\User;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 
 class SlotManager
 {
@@ -22,7 +16,8 @@ class SlotManager
     public function getMatches($slots, $location)
     {
         $users = $location->users->sortByDesc('priority');
-        $slots = $this->removeSlotsAfter($slots,
+        $slots = $this->removeSlotsAfter(
+            $slots,
             Carbon::parse($users->pluck('test_date')->sort()->last())
         );
 
@@ -61,12 +56,34 @@ class SlotManager
             $user = $user_points[$eligible_candidates->keys()->search($date)];
 
             // Final user w' slot array.
-            return ['user' => $user,
+            return [
+                'user' => $user,
                 'date' => $date,
-                'location' => $location->name];
+                'location' => $location->name
+            ];
         })->values()->filter();
 
-        return $matched_slots;
+        return $this->rankUsers($matched_slots);
+    }
+
+    public function rankUsers($matched_slots)
+    {
+        $users = User::all();
+
+        $rankedUsers = [];
+
+        foreach ($matched_slots->collapse()->groupBy('user.id') as $item) { /* @var $user User*/ /* @var $item Collection * collection of users and slots, ranked and sorted to acquire best match */
+
+            // Gets first (highest ranking) user from list 
+            $item = $item->sortByDesc('date')->sortByDesc('user.points')[0];
+
+            array_push($rankedUsers, [
+                'user' => $users->find($item['user']['id']),
+                'slot' => $item
+            ]);
+        }
+
+        return $rankedUsers;
     }
 
     /**

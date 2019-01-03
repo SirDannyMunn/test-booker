@@ -2,7 +2,6 @@
 
 namespace App\Notifications;
 
-use App\User;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\NexmoMessage;
