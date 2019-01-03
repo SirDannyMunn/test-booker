@@ -72,7 +72,7 @@ class SlotManager
 
         $rankedUsers = [];
 
-        foreach ($matched_slots->collapse()->groupBy('user.id') as $item) { /* @var $user User*/ /* @var $item Collection * collection of users and slots, ranked and sorted to acquire best match */
+        foreach ($matched_slots->flatten()->groupBy('user.id') as $item) { /* @var $user User*/ /* @var $item Collection * collection of users and slots, ranked and sorted to acquire best match */
 
             // Gets first (highest ranking) user from list 
             $item = $item->sortByDesc('date')->sortByDesc('user.points')[0];

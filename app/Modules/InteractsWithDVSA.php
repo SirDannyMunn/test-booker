@@ -32,10 +32,9 @@ trait InteractsWithDVSA
         $this->login();
         $this->checkPage("At Dashboard");
         $this->changeTestDate();
-        $this->checkPage("At Calendar");        
+        $this->checkPage("At Calendar");
     }
 
-    
     public function makeReservation()
     {
         // from calendar
@@ -69,7 +68,8 @@ trait InteractsWithDVSA
     protected function loopLocations()
     {
         $slotManager = new SlotManager;
-        foreach ($this->user->locations as $location) { /* @var $location Location */ $this->window->pause(rand(250, 1000))->click('#change-test-centre');
+        foreach ($this->user->locations as $location) { /* @var $location Location */ 
+            $this->window->pause(rand(250, 1000))->click('#change-test-centre');
             $this->checkPage("#change-test-centre");
             $this->window
                 ->pause(rand(1000, 2000))
@@ -98,7 +98,9 @@ trait InteractsWithDVSA
         foreach (array_slice($this->window->elements('.SlotPicker-slot-label'), 0, 20) as $element) {
             /** @var $element RemoteWebElement */
             $string = $element->findElement(WebDriverBy::className('SlotPicker-slot'))->getAttribute('data-datetime-label');
+            
             $slot = Carbon::parse($string)->toDateTimeString();
+
             array_push($slots[$location], $slot);
         }
 

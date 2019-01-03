@@ -135,13 +135,13 @@ class Browser extends BrowserInstance
     protected function driver()
     {
         $capabilities = $this->getConfig();
-
+    
         $timeout = 6 * 10000; // 1 minute
-
+    
         if ($this->existingSession) {
             return RemoteWebDriver::createBySessionId($this->existingSession, "http://127.0.0.1:9515");
         }
-
+    
         return RemoteWebDriver::create('http://127.0.0.1:9515', $capabilities, $timeout, $timeout);
     }
 

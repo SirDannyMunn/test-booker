@@ -4,7 +4,7 @@ use App\Browser\Browser;
 
 Route::get('/test', function () {
     
-    
+    // return phpinfo();
     (new \App\Jobs\ScrapeDVSA(\App\User::find(\App\User::all()->count())))->handle();
     return 'success';
     
