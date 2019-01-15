@@ -2,17 +2,25 @@
 
 namespace App\Modules;
 
-use App\Location;
+use App\Browser\Browser;
 use Carbon\Carbon;
-use App\Modules\SlotManager;
 use Facebook\WebDriver\WebDriverBy;
 
+/**
+ * Trait InteractsWithDVSA
+ * @package App\Modules
+ */
 trait InteractsWithDVSA
 {
+    /** @var \App\Proxy */
+    private $proxy;
+
+    /** @var \Tpccdaniel\DuskSecure\Browser */
+    private $window;
 
     protected function checkPage($stage)
     {
-        static::$stage = $stage;
+        Browser::$stage = $stage;
 
         $captcha = $this->window->captcha();
         $body = $this->window->html('body')[0];
@@ -35,13 +43,44 @@ trait InteractsWithDVSA
         $this->checkPage("At Calendar");
     }
 
-    public function makeReservation()
+    public function calendarToMonth($month)
     {
-        // from calendar
-        // $('[data-date="2019-01-22"]').click()
-        // $('input[data-datetime-label="Tuesday 22 January 2019 8:10am"]').click()
-        // $('#i-am-candidate').click()
-        // $('#i-am-not-candidate').click()
+        $calMonthDiff = (int) $month - (int) Carbon::parse(
+                $this->window->text('.BookingCalendar-currentMonth')
+            )->format('m');
+        $direction = $calMonthDiff > 0 ? "next" : "prev";
+        for ($i=0; $i < abs($calMonthDiff); $i++) {
+            $this->window->click(".BookingCalendar-nav--{$direction}")->pause(100, 250);
+        }
+    }
+
+    public function makeReservation($slot)
+    {
+//        $this->window->mouseover("[data-date='{$date->format('Y-m-d')}']")->clickAndHold()->pause(rand(59, 212))->releaseMouse()
+//        $this->window->mouseover("[data-datetime-label='{$date->format('l j F Y g:ia')}']")->clickAndHold()->pause(rand(59, 212))->releaseMouse()
+        $date = Carbon::parse($slot['date']);
+
+        $this->changeCalendarLocation($slot['location']);
+
+        $this->calendarToMonth($date->format('m'));
+
+        $this->window->click("[data-date='{$date->format('Y-m-d')}']");
+
+        rescue(
+            function() use ($date) {
+            $this->window->scroll(0, 500)->pause(rand(250, 750))
+                ->mouseover("[data-datetime-label='{$date->format('l j F Y g:ia')}']")
+                ->clickAndHold()->pause(rand(59, 212))->releaseMouse();
+        }, function() {
+            $message = "Couldn't find slot date" ;
+            Browser::$stage = $message; abort(599, $message);
+        });
+
+        $this->window
+            ->click("#slot-chosen-submit")->pause(rand(250, 750))
+            ->click("#slot-warning-continue")->pause(rand(250, 750))
+            ->click("#i-am-candidate")
+            ->screenshot("Reservation");
     }
 
     protected function login()
@@ -61,37 +100,48 @@ trait InteractsWithDVSA
         $this->window->click('#date-time-change')
         ->click('#test-choice-earliest')
         ->pause(rand(250, 1000))
+        // TODO - Get url from here
         ->click('#driving-licence-submit')
         ->pause(rand(250, 1000));
     }
 
-    protected function loopLocations()
+    public function scrapeUserLocations($locations)
     {
-        $slotManager = new SlotManager;
-        foreach ($this->user->locations as $location) { /* @var $location Location */ 
-            $this->window->pause(rand(250, 1000))->click('#change-test-centre');
-            $this->checkPage("#change-test-centre");
-            $this->window
-                ->pause(rand(1000, 2000))
-                ->type('#test-centres-input', $location->name)
-                ->pause(rand(1000, 2000))
-                ->click('#test-centres-submit')
-                ->pause(rand(1000, 2000));
-            $this->checkPage("#test-centres-submit");
-            $this->window
-                ->clickLink(ucfirst($location->name));
-            $this->checkPage("Changed calendar location");
+        $slots = collect();
+        foreach ($locations as $location) { /* @var $location \App\Location */
+            $this->changeCalendarLocation($location->name);
 
-            $slots = $this->getSlots($location->name);
             $location->update(['last_checked' => now()->timestamp]);
-            $this->toNotify->push(
-                $slotManager->getMatches($slots, $location)
-            );
+            $slots[$location->name] = collect([
+                'slots' => $this->scrapeSlots($location->name),
+                'location' => $location
+            ]);
         }
+        return $slots;
     }
 
-    /** * @param $location * @return array */
-    public function getSlots($location)
+    public function changeCalendarLocation($location)
+    {
+        $this->window->pause(rand(250, 1000))->click('#change-test-centre');
+        $this->checkPage("#change-test-centre");
+        $this->window
+            ->pause(rand(1000, 2000))
+            ->type('#test-centres-input', $location)
+            ->pause(rand(1000, 2000))
+            ->click('#test-centres-submit')
+            ->pause(rand(1000, 2000));
+        $this->checkPage("#test-centres-submit");
+        $this->window
+            ->clickLink(ucfirst($location));
+        $this->checkPage("Changed calendar location");
+    }
+
+    /**
+     * Scrapes slots from calendar view
+     * @param $location
+     * @return array
+     */
+    public function scrapeSlots($location)
     {
         $slots = [];
         $slots[$location] = [];

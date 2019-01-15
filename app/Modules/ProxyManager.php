@@ -38,20 +38,26 @@ class ProxyManager
     ];
 
     /**
-     * @param $user
+     * @param bool $useExistingProxy
      * @return mixed
      */
-    public function getProxy(User $user)
+    public function getProxy($useExistingProxy=false)
     {
-        $activeProxy = Proxy::where('active', true)->where('last_used', '<', now()->subMinutes(rand(8, 10))->toDateTimeString())->get();
+        $proxies = Proxy::where('active', true);
+
+        if ($useExistingProxy) {
+            return $proxies->where('completed', '!=', 0)->orderBy('last_used')->get()->first();
+        }
+
+        $activeProxy = $proxies->where('last_used', '<', now()->subMinutes(rand(8, 10))->toDateTimeString())->get();
 
         if (filled($activeProxy)) {
             return $activeProxy->random();
         }
 
-        $proxy = $this->newProxy();
-
-        return (new Proxy)->store($proxy, $user);
+        return (new Proxy)->store(
+            $this->newProxy()
+        );
     }
 
     public function newProxy()

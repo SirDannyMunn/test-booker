@@ -37,6 +37,16 @@ class User extends Authenticatable
         return $this->hasOne('App\Location');
     }
 
+    public function slots()
+    {
+        return $this->hasManyThrough('App\Slot', 'App\UserSlot', 'slot_id', 'id');
+    }
+
+    public function userSlots()
+    {
+        return $this->hasMany('App\UserSlot', 'user_id');
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */

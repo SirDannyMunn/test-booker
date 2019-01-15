@@ -3,6 +3,8 @@
 namespace App\Console;
 
 use App\Jobs\ScrapeDVSA;
+use App\Proxy;
+use App\Slot;
 use App\User;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -50,9 +52,7 @@ class Kernel extends ConsoleKernel
             $best_users = (new User)->getBest($users, $locations);
 
             foreach ($best_users as $user) {
-                rescue(function () use ($user) {
-                    ScrapeDVSA::dispatch($user)->onConnection('redis');
-                });
+                ScrapeDVSA::dispatch($user)->onConnection('redis')->onQueue('low');
             }
         })->cron("*/{$frequency} * * * *")
             ->name('DVSA')
@@ -61,11 +61,15 @@ class Kernel extends ConsoleKernel
 
         $schedule->call(function() {
             $yesterday = today()->subDay();
-            $proxies = Proxy::whereBetween("created_at", [$yesterday->startOfDay(), $yesterday->endOfDay()])->get();
-            // Email to me
-        })->dailyAt("9:00");        
 
-        // $schedule->call('refresh:windows')->cron("*/29 * * * *");
+            $oldSlots = Slot::where('datetime', '<', $yesterday->subMonth()->toDateTimeString());
+            // TODO - Maybe store in spreadsheet or separate table before delete
+            $oldSlots->userSlots->delete();
+            $oldSlots->delete();
+
+            $yesterdaysProxies = Proxy::whereBetween("created_at", [$yesterday->startOfDay(), $yesterday->endOfDay()])->get();
+            // Email to me
+        })->dailyAt("6:00");
     }
 
     /**

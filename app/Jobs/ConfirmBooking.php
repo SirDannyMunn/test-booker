@@ -16,8 +16,7 @@ use App\Modules\InteractsWithDVSA;
 
 class ConfirmBooking implements ShouldQueue 
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels,
-        InteractsWithDVSA;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $tries = 3;
     public $timeout = 240;
@@ -55,7 +54,7 @@ class ConfirmBooking implements ShouldQueue
 
                 $proxy->update(['last_used' => now()]);
                 
-            }, $this->user->browser_session_id);
+            }, true, $this->user->browser_session_id);
             
             // Send email
 

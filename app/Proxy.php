@@ -13,7 +13,7 @@ class Proxy extends Model
     {
         $properties = ['fails' => $this->fails + 1, 'last_used' => now()->toDateTimeString()];
 
-        if ($this->completed==0 || !$body) {
+        if ($this->completed==0 || !$body || $this->fails>2) {
             $properties = array_merge($properties, ['active' => false, 'deactivated_at' => now()]);
         }
 
@@ -29,13 +29,13 @@ class Proxy extends Model
     /**
      * @param $data
      * @param $user
+     * @return Proxy
      */
-    public function store($data, $user)
+    public function store($data)
     {
         $proxy = [
             'proxy' => $data['proxy'],
             'details' => json_encode($data),
-            'user_id' => $user['id'],
             'last_used' => now()->toDateTimeString()
         ];
 

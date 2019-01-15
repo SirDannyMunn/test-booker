@@ -24,7 +24,8 @@
         "laravel/tinker": "^1.0",
         "nexmo/client": "^1.5",
         "predis/predis": "~1.0",
-        "tpccdaniel/dusk-secure": "@dev"
+        "tpccdaniel/dusk-secure": "@dev",
+        "ext-json": "*"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.5",
