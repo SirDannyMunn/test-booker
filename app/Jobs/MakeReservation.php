@@ -71,9 +71,8 @@ class MakeReservation implements ShouldQueue
                 )->onQueue('high')->delay(now()->addMinutes(15));
 
                 $this->user->update(["browser_session_id" => $window->driver->getSessionID()]);
-            },
 
-                true);
+            }, true);
 
             $this->proxy->update(['completed' => $this->proxy->completed + 1, 'fails' => 0]);
 

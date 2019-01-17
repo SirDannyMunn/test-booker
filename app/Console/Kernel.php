@@ -10,7 +10,6 @@ use App\User;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
 
 class Kernel extends ConsoleKernel
 {
@@ -42,7 +41,7 @@ class Kernel extends ConsoleKernel
         }
 
         // allowed visits per hour split between people and limited to >= 1
-        $frequency = round( 60 / (315 / count($users) ) - 0.499 ) ?: 2;
+//        $frequency = round( 60 / (315 / count($users) ) - 0.499 ) ?: 2;
         $frequency = 1;
 
         $users->load(['locations' => function($location) use ($frequency) {
@@ -62,11 +61,11 @@ class Kernel extends ConsoleKernel
 //          ->unlessBetween('23:00', '6:00');
 
         // TODO - Make another event which rapidly gets working proxies which can at least access site.
-        $schedule->call(function() {
-            for ($i=0; $i < 6; $i++) {
-                dispatch(new FindCleanProxies)->onQueue('low')->delay(now()->addSeconds($i*10));
-            }
-        })->everyMinute();
+//        $schedule->call(function() {
+//            for ($i=0; $i < 6; $i++) {
+//                dispatch(new FindCleanProxies)->onQueue('low')->delay(now()->addSeconds($i*10));
+//            }
+//        })->everyMinute();
 
         $schedule->call(function() {
             $yesterday = today()->subDay();

@@ -18,6 +18,8 @@ class Proxy extends Model
         }
 
         $this->update($properties);
+
+        return $this;
     }
 
 

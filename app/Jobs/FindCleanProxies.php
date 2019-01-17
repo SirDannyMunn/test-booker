@@ -16,16 +16,6 @@ class FindCleanProxies implements ShouldQueue
         InteractsWithDVSA;
 
     /**
-     * Create a new job instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * Execute the job.
      *
      * @return void

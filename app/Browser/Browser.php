@@ -34,7 +34,6 @@ class Browser extends BrowserInstance
      */
     protected $proxy;
     private $existingSessionID;
-    private $useExistingProxy;
 
     /**
      * @param Closure $callback
@@ -44,25 +43,21 @@ class Browser extends BrowserInstance
      */
     public function browse(Closure $callback, $useExistingProxy=false, $existingSessionID=null)
     {
-        $this->useExistingProxy = $useExistingProxy;
+        $this->proxy = (new ProxyManager)->getProxy($useExistingProxy);
+
         $this->existingSessionID = $existingSessionID;
 
         $this->prepare();
 
-        $this->browser->storeConsoleLog(storage_path('logs'));
-
         try {
             $callback($this->browser, $this->proxy);
         } catch (Exception $e) {
+            $this->browser->storeConsoleLog(storage_path('logs'));
             if ($e instanceof WebDriverCurlException) {
                 $this->proxy->failed();
             }
 
-            $time = now()->format('y-m-d h.i.s');
-            $stage = static::$stage;
-            $logContext = ['proxy' => $this->proxy->proxy, 'time' => $time, 'error' => $e->getMessage()];
-            Log::alert("dusk failed at: {$stage}", $logContext);
-            $this->browser->screenshot("{$time} {$stage}");
+            $this->makeLog($e);
 
             $this->closeBrowser();
             throw $e;
@@ -72,36 +67,31 @@ class Browser extends BrowserInstance
     }
 
     /**
-     * @throws Exception
+     * @return RemoteWebDriver
      */
-    protected function closeBrowser()
+    protected function driver()
     {
-        if (!!$this->browser) {
-            $this->browser->quit();
-            $this->browser = null;
+        $timeout = 6 * 10000; // 1 minute
+
+        $url = $this->proxy->proxy;
+
+        $capabilities = DesiredCapabilities::chrome()
+            ->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true)
+            ->setCapability(ChromeOptions::CAPABILITY, (new ChromeOptions)->addArguments([
+                '--disable-gpu',
+                '--headless',
+                '--ignore-certificate-errors',
+//            "--user-agent={$proxy['randomUserAgent']}"
+            ]))
+            ->setCapability(WebDriverCapabilityType::PROXY, [
+                'proxyType' => 'manual', 'httpProxy' => $url, 'sslProxy' => $url, 'ftpProxy' => $url
+            ]);
+
+        if ($this->existingSessionID) {
+            return RemoteWebDriver::createBySessionId($this->existingSessionID, "http://127.0.0.1:9515");
         }
-    }
 
-    /**
-     * @param $driver
-     * @return DuskBrowser
-     */
-    protected function newBrowser($driver)
-    {
-        return new DuskBrowser($driver);
-    }
-
-    /**
-     * Create the remote web driver instance.
-     *
-     * @return \Facebook\WebDriver\Remote\RemoteWebDriver
-     * @throws Exception
-     */
-    protected function createWebDriver()
-    {
-        return retry(5, function () {
-            return $this->driver();
-        }, 50);
+        return RemoteWebDriver::create('http://127.0.0.1:9515', $capabilities, $timeout, $timeout);
     }
 
     /**
@@ -125,39 +115,13 @@ class Browser extends BrowserInstance
         }
     }
 
-    public function getConfig()
+    private function makeLog($e)
     {
-        $this->proxy = (new ProxyManager)->getProxy($this->useExistingProxy);
-
-        $url = $this->proxy->proxy;
-
-        return DesiredCapabilities::chrome()
-            ->setCapability(WebDriverCapabilityType::ACCEPT_SSL_CERTS, true)
-            ->setCapability(ChromeOptions::CAPABILITY, (new ChromeOptions)->addArguments([
-                '--disable-gpu',
-                '--headless',
-                '--ignore-certificate-errors',
-//            "--user-agent={$proxy['randomUserAgent']}"
-            ]))
-            ->setCapability(WebDriverCapabilityType::PROXY, [
-                'proxyType' => 'manual', 'httpProxy' => $url, 'sslProxy' => $url, 'ftpProxy' => $url
-            ]);
-    }
-
-    /**
-     * @return RemoteWebDriver
-     */
-    protected function driver()
-    {
-        $capabilities = $this->getConfig();
-    
-        $timeout = 6 * 10000; // 1 minute
-    
-        if ($this->existingSessionID) {
-            return RemoteWebDriver::createBySessionId($this->existingSessionID, "http://127.0.0.1:9515");
-        }
-    
-        return RemoteWebDriver::create('http://127.0.0.1:9515', $capabilities, $timeout, $timeout);
+        $time = now()->format('y-m-d h.i.s');
+        $stage = static::$stage;
+        $logContext = ['proxy' => $this->proxy->proxy, 'time' => $time, 'error' => $e->getMessage()];
+        Log::alert("dusk failed at: {$stage}", $logContext);
+        $this->browser->screenshot("{$time} {$stage}");
     }
 
     // /**

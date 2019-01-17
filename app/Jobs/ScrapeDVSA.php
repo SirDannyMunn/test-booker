@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Modules\ProxyManager;
 use App\User;
 //use App\Proxy;
 //use Carbon\Carbon;
@@ -68,9 +69,10 @@ class ScrapeDVSA
                 $this->getToCalendar();
 
                 $this->toNotify = $this->scrapeUserLocations($this->user->locations)->map(function ($item) {
-                    $slots = $this->slotManager->getMatches($item['slots'], $item['location']);
+                    return $slots = $this->slotManager->getMatches($item['slots'], $item['location']);
                     // TODO - run reservation process straight after match made?
                         // Review implications
+                            // -
                     // $slots;
                 });
             });
@@ -107,6 +109,25 @@ class ScrapeDVSA
             \Log::info('Releasing job');
 //            return $this->release(30);
         });
+    }
+
+    public function makeReservationEvents()
+    {
+        $this->proxy->update(['completed' => $this->proxy->completed + 1, 'fails' => 0]);
+
+        $userSlots = $this->toNotify->groupBy('user.id');
+
+        $eligibleUsers = User::whereIn('id', $userSlots->collapse()->pluck('user.id'))->get();
+        foreach ($userSlots as $item) { /* @var $item Illuminate\Support\Collection */
+
+            // Gets earliest (highest ranking) slot from each users' list
+            $best = collect($item)->sortByDesc('date')->sortByDesc('user.points')[0];
+
+            dispatch(new MakeReservation(
+                $eligibleUsers->find($best['user']['id']),
+                $best['userSlot']
+            ))->onQueue('medium');
+        }
     }
 
     /**
