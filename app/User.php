@@ -29,9 +29,6 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\hasOne
-     */
     public function location()
     {
         return $this->hasOne('App\Location');
@@ -47,9 +44,6 @@ class User extends Authenticatable
         return $this->hasMany('App\UserSlot', 'user_id');
     }
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
     public function locations()
     {
         return $this->belongsToMany('App\Location', 'user_location');
@@ -66,6 +60,7 @@ class User extends Authenticatable
     }
 
     /**
+     * Returns user records based on most area coverage
      * @param $users Collection
      * @param $locations Collection
      * @return \Illuminate\Support\Collection

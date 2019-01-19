@@ -18,11 +18,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use App\Location;
 use App\Modules\SlotManager;
 
-class ScrapeDVSA
+class ScrapeDVSA implements ShouldQueue
 {
-//    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels,
-//        InteractsWithDVSA;
-    use InteractsWithDVSA;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels,
+        InteractsWithDVSA;
+//    use InteractsWithDVSA;
 
     public $tries = 3;
     public $timeout = 240;
@@ -135,7 +135,7 @@ class ScrapeDVSA
      */
     public function failed()
     {
-        $this->handle();
+//        $this->handle();
     }
 
     public function __destruct()

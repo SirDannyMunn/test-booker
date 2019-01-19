@@ -52,12 +52,10 @@ class Browser extends BrowserInstance
         try {
             $callback($this->browser, $this->proxy);
         } catch (Exception $e) {
-            $this->browser->storeConsoleLog(storage_path('logs'));
+            $this->makeLog($e);
             if ($e instanceof WebDriverCurlException) {
                 $this->proxy->failed();
             }
-
-            $this->makeLog($e);
 
             $this->closeBrowser();
             throw $e;
@@ -118,11 +116,14 @@ class Browser extends BrowserInstance
     private function makeLog($e)
     {
         $time = now()->format('y-m-d h.i.s');
-        $stage = static::$stage;
+        $stage = (string) static::$stage;
         $logContext = ['proxy' => $this->proxy->proxy, 'time' => $time, 'error' => $e->getMessage()];
         Log::alert("dusk failed at: {$stage}", $logContext);
         $this->browser->screenshot("{$time} {$stage}");
+        $this->browser->storeConsoleLog(storage_path("{$time} {$stage}"));
     }
+
+
 
     // /**
     //  * @throws Exception

@@ -56,8 +56,8 @@ class Kernel extends ConsoleKernel
                 dispatch(new ScrapeDVSA($user))->onQueue('medium');
             }
         })->cron("*/{$frequency} * * * *")
-            ->name('DVSA')
-            ->withoutOverlapping();
+            ->name('DVSA');
+//            ->withoutOverlapping();
 //          ->unlessBetween('23:00', '6:00');
 
         // TODO - Make another event which rapidly gets working proxies which can at least access site.

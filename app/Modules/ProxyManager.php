@@ -21,7 +21,7 @@ class ProxyManager
     {
         $this->proxies = Proxy::where('active', true);
 
-        $this->timeLimit = now()->subMinutes(rand(8, 10))->toDateTimeString();
+        $this->timeLimit = now()->subMinutes(env('PROXY_WAIT_PERIOD'))->toDateTimeString();
     }
 
     /**
@@ -49,7 +49,8 @@ class ProxyManager
 
         $body = [
             'query' => [
-                'apiKey' => 'Rr6QBHMTmVwpzfGJt3nYhvgqcdAb75KP',
+//                'Rr6QBHMTmVwpzfGJt3nYhvgqcdAb75KP'
+                'apiKey' => 'CJNRT6zVxcBD8fQYbj95tSGKL2MevXEW',
                 "connectionType" => "Residential",
                 "referer" => false,
 //                "country" => "GB"

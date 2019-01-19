@@ -15,6 +15,8 @@ class FindCleanProxies implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels,
         InteractsWithDVSA;
 
+    public $tries = 1;
+
     /**
      * Execute the job.
      *

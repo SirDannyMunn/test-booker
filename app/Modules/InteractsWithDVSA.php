@@ -18,6 +18,8 @@ trait InteractsWithDVSA
     /** @var \Tpccdaniel\DuskSecure\Browser */
     private $window;
 
+    private $testCentres=0;
+
     protected function checkPage($stage)
     {
         Browser::$stage = $stage;
@@ -97,11 +99,11 @@ trait InteractsWithDVSA
 
     protected function changeTestDate()
     {
-        $this->window->click('#date-time-change')
-        ->click('#test-choice-earliest')
+        $this->window->click("#date-time-change")
+        ->click("#test-choice-earliest")
         ->pause(rand(250, 1000))
         // TODO - Get url from here
-        ->click('#driving-licence-submit')
+        ->click("#driving-licence-submit")
         ->pause(rand(250, 1000));
     }
 
@@ -123,17 +125,18 @@ trait InteractsWithDVSA
     public function changeCalendarLocation($location)
     {
         $this->window->pause(rand(250, 1000))->click('#change-test-centre');
-        $this->checkPage("#change-test-centre");
+        $this->checkPage("#change-test-centre {$this->testCentres}");
         $this->window
             ->pause(rand(1000, 2000))
             ->type('#test-centres-input', $location)
             ->pause(rand(1000, 2000))
             ->click('#test-centres-submit')
             ->pause(rand(1000, 2000));
-        $this->checkPage("#test-centres-submit");
+        $this->checkPage("#test-centres-submit {$this->testCentres}");
         $this->window
             ->clickLink(ucfirst($location));
-        $this->checkPage("Changed calendar location");
+        $this->checkPage("Changed calendar location {$this->testCentres}");
+        $this->testCentres++;
     }
 
     /**
