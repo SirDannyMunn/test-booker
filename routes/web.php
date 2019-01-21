@@ -8,8 +8,8 @@
     //    return \App\Proxy::all()->count() < 60;
         $user = \App\User::find(1);
 //        return
-    //    return dispatch_now(new \App\Jobs\ScrapeDVSA(\App\User::find(1)));
-        return dispatch_now(new \App\Jobs\MakeReservation($user, $user->userSlots->find(29)));
+        return dispatch_now(new \App\Jobs\ScrapeDVSA(\App\User::find(1)));
+//        return dispatch_now(new \App\Jobs\MakeReservation($user, $user->userSlots->find(29)));
     //    return \App\User::find(1)->userSlots;
 
     //    (new Browser)->browse(/**

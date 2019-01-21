@@ -70,7 +70,11 @@ class ScrapeDVSA implements ShouldQueue
                 $this->getToCalendar();
 
                 $this->toNotify = $this->scrapeUserLocations($this->user->locations)->map(function ($item) {
-                    return $slots = $this->slotManager->getMatches($item['slots'], $item['location']);
+                    $slots = $this->slotManager->getMatches($item['slots'], $item['location']);
+
+                    if (filled($slots)) {
+                        return $slots;
+                    }
                     // TODO - run reservation process straight after match made?
                         // Review implications
                             // -
@@ -90,7 +94,7 @@ class ScrapeDVSA implements ShouldQueue
             $this->window->quit();
             $this->proxy->update(['completed' => $this->proxy->completed + 1, 'fails' => 0]);
 
-            $userSlots = $this->toNotify->groupBy('user.id');
+            $userSlots = $this->toNotify->filter()->groupBy('user.id');
 
             $eligibleUsers = User::whereIn('id', $userSlots->collapse()->collapse()->pluck('user.id'))->get();
 

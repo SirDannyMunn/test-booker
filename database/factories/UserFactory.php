@@ -28,7 +28,7 @@ $factory->define(App\User::class, function (Faker $faker) {
 });
 
 $factory->defineAs(App\User::class, 'admin', function (Faker $faker) {
-    
+
     return [
         'name' => 'admin',
         'email' => 'admin@email.com',
