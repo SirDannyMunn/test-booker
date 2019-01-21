@@ -51,6 +51,7 @@ trait InteractsWithDVSA
                 $this->window->text('.BookingCalendar-currentMonth')
             )->format('m');
         $direction = $calMonthDiff > 0 ? "next" : "prev";
+
         for ($i=0; $i < abs($calMonthDiff); $i++) {
             $this->window->click(".BookingCalendar-nav--{$direction}")->pause(100, 250);
         }
@@ -60,7 +61,7 @@ trait InteractsWithDVSA
     {
 //        $this->window->mouseover("[data-date='{$date->format('Y-m-d')}']")->clickAndHold()->pause(rand(59, 212))->releaseMouse()
 //        $this->window->mouseover("[data-datetime-label='{$date->format('l j F Y g:ia')}']")->clickAndHold()->pause(rand(59, 212))->releaseMouse()
-        $date = Carbon::parse($slot['date']);
+        $date = Carbon::parse($slot->datetime);
 
         $this->changeCalendarLocation($slot['location']);
 
@@ -71,15 +72,18 @@ trait InteractsWithDVSA
         rescue(
             function() use ($date) {
             $this->window->scroll(0, 500)->pause(rand(250, 750))
-                ->mouseover("[data-datetime-label='{$date->format('l j F Y g:ia')}']")
-                ->clickAndHold()->pause(rand(59, 212))->releaseMouse();
-        }, function() {
-            $message = "Couldn't find slot date" ;
+                ->click("[data-datetime-label='{$date->format('l j F Y g:ia')}']");
+//                ->mouseover("[data-datetime-label='{$date->format('l j F Y g:ia')}']")
+//                ->clickAndHold()->pause(rand(59, 212))->releaseMouse();
+            }, function() {
+            $message = "Couldn't find slot date";
             Browser::$stage = $message; abort(599, $message);
         });
 
+        $this->window->screenshot('Picked date');
+
         $this->window
-            ->click("#slot-chosen-submit")->pause(rand(250, 750))
+            ->click("#slot-chosen-submit")->pause(rand(250, 750))->screenshot('After submission')
             ->click("#slot-warning-continue")->pause(rand(250, 750))
             ->click("#i-am-candidate")
             ->screenshot("Reservation");

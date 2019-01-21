@@ -28,14 +28,12 @@ $factory->define(App\User::class, function (Faker $faker) {
 });
 
 $factory->defineAs(App\User::class, 'admin', function (Faker $faker) {
-
-    $testDate = now()->addMonths(rand(1,2))->addWeeks(rand(1,4))->addDays(rand(1,7));
-
+    
     return [
         'name' => 'admin',
         'email' => 'admin@email.com',
         'phone_number' => '07421353876',
-        'test_date' => $testDate,
+        'test_date' => env('DEBUG_TEST_DATE'),
         'preferred_date' => 'asap',
         'dl_number' => encrypt(env('DL_NUMBER')),
         'ref_number' => encrypt(env('REF_NUMBER')),

@@ -76,7 +76,7 @@ class SlotManager
             foreach ($users as $user) {
                 $id = $user->id;
                 $user_points[$slot][$id] = 0;
-                if (Carbon::parse($slot)->greaterThan($user->test_date))
+                if (Carbon::parse($slot)->greaterThanOrEqualTo($user->test_date))
                     continue;
                 if ($user->priority)
                     $user_points[$slot][$id] += 2;

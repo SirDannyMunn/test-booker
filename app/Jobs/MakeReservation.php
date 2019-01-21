@@ -60,11 +60,7 @@ class MakeReservation implements ShouldQueue
                 $this->proxy = $proxy;
                 $this->window = $window;
 
-                Log::notice("Starting Reservations {$this->user->id}");
-
                 $this->getToCalendar();
-
-                Log::notice("Making Reservation {$this->user->id}");
 
                 $this->makeReservation($this->slot);
 
