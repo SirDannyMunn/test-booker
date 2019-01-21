@@ -8,6 +8,7 @@ use App\Browser\Browser;
 use App\UserSlot;
 use Illuminate\Bus\Queueable;
 use App\Modules\InteractsWithDVSA;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -59,9 +60,15 @@ class MakeReservation implements ShouldQueue
                 $this->proxy = $proxy;
                 $this->window = $window;
 
+                Log::notice("Starting Reservations {$this->user->id}");
+
                 $this->getToCalendar();
 
+                Log::notice("Making Reservation {$this->user->id}");
+
                 $this->makeReservation($this->slot);
+
+                Log::notice("Notifying {$this->user->id}");
 
                 $this->user->notify(new ReservationMade($this->user, $this->userSlot));
                 $this->userSlot->update(['tries'=>$this->userSlot->tries+1]);
@@ -91,7 +98,7 @@ class MakeReservation implements ShouldQueue
      */
     public function failed()
     {
-        $this->handle();
+//        $this->handle();
         \Log::alert('MAKE RESERVATION FAILED');
     }
 }

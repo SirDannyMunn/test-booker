@@ -37,13 +37,16 @@ class Browser extends BrowserInstance
 
     /**
      * @param Closure $callback
-     * @param $useExistingProxy
+     * @param bool $useExistingProxy
+     * @param bool $hunting
      * @param null $existingSessionID
      * @throws Throwable
+     * @throws WebDriverCurlException
      */
-    public function browse(Closure $callback, $useExistingProxy=false, $existingSessionID=null)
+    public function browse(Closure $callback, $useExistingProxy=false, $hunting=false, $existingSessionID=null)
     {
-        $this->proxy = (new ProxyManager)->getProxy($useExistingProxy);
+        $this->proxy = (new ProxyManager)->getProxy($useExistingProxy, $hunting);
+//        $this->proxy = Proxy::find(60);
 
         $this->existingSessionID = $existingSessionID;
 
@@ -89,6 +92,7 @@ class Browser extends BrowserInstance
             return RemoteWebDriver::createBySessionId($this->existingSessionID, "http://127.0.0.1:9515");
         }
 
+        // TODO - Fix this
         return RemoteWebDriver::create('http://127.0.0.1:9515', $capabilities, $timeout, $timeout);
     }
 
@@ -109,7 +113,7 @@ class Browser extends BrowserInstance
         ]);
 
         if (!$this->browser) {
-            $this->browser = $this->newBrowser($this->createWebDriver());
+            $this->browser = $this->browser($this->createWebDriver());
         }
     }
 
@@ -120,10 +124,41 @@ class Browser extends BrowserInstance
         $logContext = ['proxy' => $this->proxy->proxy, 'time' => $time, 'error' => $e->getMessage()];
         Log::alert("dusk failed at: {$stage}", $logContext);
         $this->browser->screenshot("{$time} {$stage}");
-        $this->browser->storeConsoleLog(storage_path("{$time} {$stage}"));
+        $this->browser->storeConsoleLog("{$time} {$stage}");
     }
 
+    /**
+     * @throws Exception
+     */
+    protected function closeBrowser()
+    {
+        if (!!$this->browser) {
+            $this->browser->quit();
+            $this->browser = null;
+        }
+    }
 
+    /**
+     * @param $driver
+     * @return DuskBrowser
+     */
+    protected function browser($driver)
+    {
+        return new DuskBrowser($driver);
+    }
+
+    /**
+     * Create the remote web driver instance.
+     *
+     * @return \Facebook\WebDriver\Remote\RemoteWebDriver
+     * @throws Exception
+     */
+    protected function createWebDriver()
+    {
+        return retry(5, function () {
+            return $this->driver();
+        }, 50);
+    }
 
     // /**
     //  * @throws Exception

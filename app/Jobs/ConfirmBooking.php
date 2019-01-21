@@ -54,7 +54,7 @@ class ConfirmBooking implements ShouldQueue
 
                 $proxy->update(['last_used' => now()]);
                 
-            }, true, $this->user->browser_session_id);
+            }, true, false, $this->user->browser_session_id);
             
             // Send email
 

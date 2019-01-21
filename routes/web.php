@@ -5,9 +5,19 @@ use App\Browser\Browser;
 Route::get('/test', function () {
 
 //    return \App\Slot::where('datetime', '<', today()->addDays(50)->toDateTimeString())->delete();
-
-    return (new \App\Jobs\ScrapeDVSA(\App\User::find(1)))->handle();
+//    return \App\Proxy::all()->count() < 60;
+    return dispatch_now(new \App\Jobs\ScrapeDVSA(\App\User::find(1)));
 //    return \App\User::find(1)->userSlots;
+
+//    (new Browser)->browse(/**
+//     * @param $window
+//     * @param $proxy
+//     */
+//        function ($window, $proxy) {
+//
+//
+//            Log::notice('Sucessful browser open');
+//     });
 
     return 'success';
 });

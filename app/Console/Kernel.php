@@ -61,11 +61,13 @@ class Kernel extends ConsoleKernel
 //          ->unlessBetween('23:00', '6:00');
 
         // TODO - Make another event which rapidly gets working proxies which can at least access site.
-//        $schedule->call(function() {
-//            for ($i=0; $i < 6; $i++) {
-//                dispatch(new FindCleanProxies)->onQueue('low')->delay(now()->addSeconds($i*10));
-//            }
-//        })->everyMinute();
+        $schedule->call(function() {
+            if (Proxy::all()->count() < 60) {
+                for ($i=0; $i < 6; $i++) {
+                    dispatch(new FindCleanProxies)->onQueue('low')->delay(now()->addSeconds($i*10));
+                }
+            }
+        })->everyMinute();
 
         $schedule->call(function() {
             $yesterday = today()->subDay();

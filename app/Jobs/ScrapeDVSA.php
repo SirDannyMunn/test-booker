@@ -10,6 +10,7 @@ use App\Browser\Browser;
 //use App\Jobs\MakeReservation;
 use Illuminate\Bus\Queueable;
 use App\Modules\InteractsWithDVSA;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -84,15 +85,26 @@ class ScrapeDVSA implements ShouldQueue
 //            $this->toNotify = $this->slotManager->getMatches($slots['slots'], Location::find(1));
 //            $userSlots = collect(json_decode('{"6":[{"user":{"id":6,"points":5},"date":"2019-02-27 08:10:00","location":"Skipton","userSlot":{"user_id":6,"slot_id":13,"points":5}},{"user":{"id":6,"points":2},"date":"2019-02-26 08:10:00","location":"Preston","userSlot":{"user_id":6,"slot_id":17,"points":2}},{"user":{"id":6,"points":2},"date":"2019-03-13 08:10:00","location":"halifax","userSlot":{"user_id":6,"slot_id":19,"points":2}}],"1":[{"user":{"id":1,"points":5},"date":"2019-03-08 08:10:00","location":"Skipton","userSlot":{"user_id":1,"slot_id":3,"points":5}},{"user":{"id":1,"points":2},"date":"2019-02-26 09:07:00","location":"Preston","userSlot":{"user_id":1,"slot_id":18,"points":2}}],"4":[{"user":{"id":4,"points":3},"date":"2019-03-11 08:10:00","location":"Skipton","userSlot":{"user_id":4,"slot_id":4,"points":3}}],"2":[{"user":{"id":2,"points":3},"date":"2019-02-25 08:10:00","location":"Preston","userSlot":{"user_id":2,"slot_id":15,"points":3}}],"7":[{"user":{"id":7,"points":2},"date":"2019-02-25 12:38:00","location":"Preston","userSlot":{"user_id":7,"slot_id":16,"points":2}}]}', true));
 
+            Log::notice('Updating proxy completions');
+
+            $this->window->quit();
             $this->proxy->update(['completed' => $this->proxy->completed + 1, 'fails' => 0]);
 
             $userSlots = $this->toNotify->groupBy('user.id');
 
-            $eligibleUsers = User::whereIn('id', $userSlots->collapse()->pluck('user.id'))->get();
+            $eligibleUsers = User::whereIn('id', $userSlots->collapse()->collapse()->pluck('user.id'))->get();
+
+            Log::notice($eligibleUsers);
+            Log::notice($userSlots->collapse()->collapse()->pluck('user.id'));
+
             foreach ($userSlots as $item) { /* @var $item Illuminate\Support\Collection */
 
+                Log::notice('Notifying Users');
+
                 // Gets earliest (highest ranking) slot from each users' list
-                $best = collect($item)->sortByDesc('date')->sortByDesc('user.points')[0];
+                $best = collect($item)->sortByDesc('date')->sortByDesc('user.points')[0][0];
+
+                Log::notice($best);
 
                 dispatch(new MakeReservation(
                     $eligibleUsers->find($best['user']['id']),
@@ -123,7 +135,7 @@ class ScrapeDVSA implements ShouldQueue
             // Gets earliest (highest ranking) slot from each users' list
             $best = collect($item)->sortByDesc('date')->sortByDesc('user.points')[0];
 
-            dispatch(new MakeReservation(
+            dispatch_now(new MakeReservation(
                 $eligibleUsers->find($best['user']['id']),
                 $best['userSlot']
             ))->onQueue('medium');

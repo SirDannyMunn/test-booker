@@ -30,7 +30,7 @@ trait InteractsWithDVSA
         if (!$captcha && $body != '') return true;
 
         $this->proxy->failed($body);
-        $this->window->quit();
+//        $this->window->quit();
         $this->failed();
 
         abort(500, $captcha ? 'Captcha found' : 'Blank Response');

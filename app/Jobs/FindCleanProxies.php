@@ -29,17 +29,21 @@ class FindCleanProxies implements ShouldQueue
          * @param $window
          * @param $proxy
          */
-            function ($window, $proxy) {
+        function ($window, $proxy) {
 
-                $this->proxy = $proxy;
-                $this->window = $window;
+            $this->proxy = $proxy;
+            $this->window = $window;
 
-                $this->login();
-                $url = 'https://www.gov.uk/change-driving-test';
-                $this->window->visit($url);
-                $this->checkPage("Accessing site");
-                $this->window->click('#get-started > a');
-                $this->checkPage("Logging in");
-            });
+            $url = 'https://www.gov.uk/change-driving-test';
+            $this->window->visit($url);
+            $this->checkPage("Accessing site");
+            $this->window->click('#get-started > a');
+            $this->checkPage("Logging in");
+        }, false, true);
+    }
+
+    public function failed()
+    {
+        
     }
 }

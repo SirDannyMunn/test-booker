@@ -26,18 +26,19 @@ class ProxyManager
 
     /**
      * @param bool $clean
+     * @param bool $hunting
      * @return mixed
      */
-    public function getProxy($clean=false)
+    public function getProxy($clean=false, $hunting=false)
     {
         if ($clean) {
             return $this->proxies->where('completed', '!=', 0)->orderBy('last_used')->get()->first();
         }
 
-        $activeProxy = $this->proxies->where('last_used', '<', $this->timeLimit)->get();
+        $activeProxy = $this->proxies->where('last_used', '<', $this->timeLimit)->orderBy('last_used')->get();
 
-        if (filled($activeProxy)) {
-            return $activeProxy->random();
+        if (filled($activeProxy) && !$hunting) {
+            return $activeProxy->last();
         }
 
         return $this->newProxy();
