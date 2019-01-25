@@ -62,7 +62,7 @@ class Kernel extends ConsoleKernel
 
         // TODO - Make another event which rapidly gets working proxies which can at least access site.
         $schedule->call(function() {
-            if (Proxy::all()->count() < 60) {
+            if (Proxy::all()->count() < 50) {
                 for ($i=0; $i < 6; $i++) {
                     dispatch(new FindCleanProxies)->onQueue('low')->delay(now()->addSeconds($i*10));
                 }

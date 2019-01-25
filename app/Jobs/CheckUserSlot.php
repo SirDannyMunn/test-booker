@@ -13,18 +13,20 @@ class CheckUserSlot implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private $user;
+    private $userSlot;
     private $slot;
 
     /**
      * Create a new job instance.
      *
      * @param $user
-     * @param $slot
+     * @param $userSlot
      */
-    public function __construct($user, $slot)
+    public function __construct($user, $userSlot)
     {
         $this->user = $user;
-        $this->slot = $slot;
+        $this->userSlot = $userSlot;
+        $this->slot = $userSlot->slot;
     }
 
     /**
@@ -36,8 +38,17 @@ class CheckUserSlot implements ShouldQueue
     {
         // if UserSlot taken
             // Return;
+        if ($this->userSlot->slot->taken) {
+            return;
+        }
 
+        $alternativeUserSlots = $this->slot->userSlots->sortByDesc('points')->sortBy('tries');
 
+        // Load each user
+        // Check each user availability (whether they currently have an offer open)
+        // Disqualify any users who are being checked
+
+        dispatch(new MakeReservation($alternativeUserSlots->first()->user, $this->userSlot));
         // Close old browser session
         // NEXT BEST USER
             // Hasn't just been offered slot.

@@ -94,27 +94,7 @@ class ScrapeDVSA implements ShouldQueue
             $this->window->quit();
             $this->proxy->update(['completed' => $this->proxy->completed + 1, 'fails' => 0]);
 
-            $userSlots = $this->toNotify->filter()->groupBy('user.id');
 
-            $eligibleUsers = User::whereIn('id', $userSlots->collapse()->collapse()->pluck('user.id'))->get();
-
-            Log::notice($eligibleUsers);
-            Log::notice($userSlots->collapse()->collapse()->pluck('user.id'));
-
-            foreach ($userSlots as $item) { /* @var $item Illuminate\Support\Collection */
-
-                Log::notice('Notifying Users');
-
-                // Gets earliest (highest ranking) slot from each users' list
-                $best = collect($item)->sortByDesc('date')->sortByDesc('user.points')[0][0];
-
-                Log::notice($best);
-
-                dispatch(new MakeReservation(
-                    $eligibleUsers->find($best['user']['id']),
-                    $best['userSlot']
-                ))->onQueue('medium');
-            }
         }, function () {
 
             \Log::info('Releasing user');
@@ -125,24 +105,39 @@ class ScrapeDVSA implements ShouldQueue
             \Log::info('Releasing job');
 //            return $this->release(30);
         });
+
+        if ($this->toNotify) {
+            $this->makeReservationEvents();
+        }
     }
 
     public function makeReservationEvents()
     {
-        $this->proxy->update(['completed' => $this->proxy->completed + 1, 'fails' => 0]);
+        $userSlots = $this->toNotify->filter()->groupBy('user.id');
 
-        $userSlots = $this->toNotify->groupBy('user.id');
+        $eligibleUsers = User::whereIn('id', $userSlots->collapse()->collapse()->pluck('user.id'))->get();
 
-        $eligibleUsers = User::whereIn('id', $userSlots->collapse()->pluck('user.id'))->get();
+        Log::notice($eligibleUsers);
+        Log::notice($userSlots->collapse()->collapse()->pluck('user.id'));
+
         foreach ($userSlots as $item) { /* @var $item Illuminate\Support\Collection */
 
-            // Gets earliest (highest ranking) slot from each users' list
-            $best = collect($item)->sortByDesc('date')->sortByDesc('user.points')[0];
+            Log::notice('Notifying Users');
 
-            dispatch_now(new MakeReservation(
-                $eligibleUsers->find($best['user']['id']),
-                $best['userSlot']
-            ))->onQueue('medium');
+            // Gets earliest (highest ranking) slot from each users' list
+            $best = collect($item)->sortByDesc('date')->sortByDesc('user.points')[0][0];
+
+            Log::notice($best);
+
+                dispatch(new MakeReservation(
+                    $eligibleUsers->find($best['user']['id']),
+                    $best['userSlot']
+                ))->onQueue('medium');
+
+//            dispatch_now(new MakeReservation(
+//                $eligibleUsers->find($best['user']['id']),
+//                $best['userSlot']
+//            ));
         }
     }
 

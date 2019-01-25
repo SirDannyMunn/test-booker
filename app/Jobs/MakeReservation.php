@@ -66,7 +66,7 @@ class MakeReservation implements ShouldQueue
 
                 Log::notice("Notifying {$this->user->id}");
 
-                $this->user->notify(new ReservationMade($this->user, $this->userSlot));
+                $this->user->notify(new ReservationMade($this->user, $this->slot));
                 $this->userSlot->update(['tries'=>$this->userSlot->tries+1]);
 
                 dispatch(new CheckUserSlot(
@@ -90,11 +90,10 @@ class MakeReservation implements ShouldQueue
     }
 
     /**
-     * @throws \Illuminate\Contracts\Redis\LimiterTimeoutException
      */
     public function failed()
     {
 //        $this->handle();
-        \Log::alert('MAKE RESERVATION FAILED');
+        \Log::critical('MAKE RESERVATION FAILED', ['data' => $this]);
     }
 }

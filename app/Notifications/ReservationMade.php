@@ -2,6 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Slot;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\NexmoMessage;
@@ -14,26 +16,25 @@ class ReservationMade extends Notification
 
     protected $user;
     protected $date;
-    protected $location;
-    protected $actionCode;
+    protected $slot;
+    private $actionUrl;
 
-    public function __construct($user, $slot)
+    public function __construct(User $user, Slot $slot)
     {
         $this->user = $user;
-        $this->location = $slot['location'];
+        $this->slot = $slot;
         $this->date = Carbon::parse($slot['date'])->format('d/m/y h:m');
-        $this->actionCode = uniqid() . str_random(10);
 
-        $this->user->action_code = $this->actionCode;
+        $actionCode = uniqid() . str_random(10);
+        $this->actionUrl = url("user/accept_booking?user={$actionCode}");
+
+        $this->user->action_code = $actionCode;
         $this->user->save();
     }
 
     public function via($notifiable)
     {
-        if ($this->user->contact_preference == 'sms')
-            return ['nexmo'];
-
-        return ['mail'];
+        return $this->user->contact_preference == 'sms' ? ['nexmo'] : ['mail'];
     }
 
     public function toNexmo($notifiable)
@@ -45,16 +46,24 @@ class ReservationMade extends Notification
 
     public function toMail($notifiable)
     {
-        $test_date = Carbon::parse($this->user->test_date)->format('d/m/y h:m');
+        $test_date = Carbon::parse($this->user->test_date);
 
-        return (new MailMessage)
-                ->greeting("Hi {$this->user->name}!")
-                ->line("Your test is on at {$test_date}")
-                ->line("We have a test available at {$this->date} at {$this->location} test centre")
-                ->line("If you would like this date, please click the button below.
-                 Otherwise, ignore this message and we will send you another date when one comes up.")
-                ->action('Book', url("user/accept_booking?user={$this->actionCode}"))
-                ->line('Thank you for using our service!');
+        $message = new MailMessage;
+
+        $message->greeting("Hi {$this->user->name}!")
+            ->line("Your test is on at {$test_date->format('d/m/y h:m')}");
+
+        if ($this->slot->withinLimit()) {
+            $message->line("Warning: This test is within the three day limit. If you use this test, you may not be able to change it.");
+        }
+
+        $message->line("We have a test available at {$this->date} at {$this->slot->location} test centre")
+            ->line("If you would like this date, please click the button below.
+             Otherwise, ignore this message and we will send you another date when one comes up.")
+            ->action('Book', $this->actionUrl)
+            ->line('Thank you for using our service!');
+
+        return $message;
     }
 
     /**

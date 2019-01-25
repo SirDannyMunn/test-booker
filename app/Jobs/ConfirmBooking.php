@@ -52,6 +52,8 @@ class ConfirmBooking implements ShouldQueue
 
                 $window->click("#confirm-changes");
 
+                $window->checkPresent('// Validation');
+
                 $proxy->update(['last_used' => now()]);
                 
             }, true, false, $this->user->browser_session_id);

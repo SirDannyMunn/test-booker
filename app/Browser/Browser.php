@@ -55,12 +55,13 @@ class Browser extends BrowserInstance
         try {
             $callback($this->browser, $this->proxy);
         } catch (Exception $e) {
-            $this->makeLog($e);
-            if ($e instanceof WebDriverCurlException) {
-                $this->proxy->failed();
-            }
 
+            if (static::$stage != 'Accessing site')
+                $this->makeLog($e);
+            if ($e instanceof WebDriverCurlException)
+                $this->proxy->failed();
             $this->closeBrowser();
+
             throw $e;
         } catch (Throwable $e) {
             throw $e;

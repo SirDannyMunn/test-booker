@@ -72,9 +72,9 @@ trait InteractsWithDVSA
         rescue(
             function() use ($date) {
             $this->window->scroll(0, 500)->pause(rand(250, 750))
-                ->click("[data-datetime-label='{$date->format('l j F Y g:ia')}']");
-//                ->mouseover("[data-datetime-label='{$date->format('l j F Y g:ia')}']")
-//                ->clickAndHold()->pause(rand(59, 212))->releaseMouse();
+//                ->click("[data-datetime-label='{$date->format('l j F Y g:ia')}']");
+                ->mouseover("[data-datetime-label='{$date->format('l j F Y g:ia')}']")
+                ->clickAndHold()->pause(rand(59, 212))->releaseMouse();
             }, function() {
             $message = "Couldn't find slot date";
             Browser::$stage = $message; abort(599, $message);
@@ -84,8 +84,14 @@ trait InteractsWithDVSA
 
         $this->window
             ->click("#slot-chosen-submit")->pause(rand(250, 750))->screenshot('After submission')
-            ->click("#slot-warning-continue")->pause(rand(250, 750))
-            ->click("#i-am-candidate")
+//            ->mouseover("#slot-warning-continue")->clickAndHold()->pause(rand(59, 212))->releaseMouse()
+            ->jqueryClick("#slot-warning-continue")
+            ->pause(rand(250, 750));
+
+        $this->window->screenshot(str_random(6));
+        \Log::notice($this->window->html('body')[0]);
+
+        $this->window->click("#i-am-candidate")
             ->screenshot("Reservation");
     }
 
