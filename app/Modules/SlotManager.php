@@ -86,6 +86,7 @@ class SlotManager
                     $user_points[$slot][$id] += 1;
             }
         }
+
         return $user_points;
     }
 
@@ -105,12 +106,6 @@ class SlotManager
 
             $slot = Slot::updateOrCreate(['location'=>$location->name,'datetime'=>$datetime]);
 
-            $data = [
-                'user' => $user,
-                'date' => $datetime,
-                'location' => $location->name,
-            ];
-
             // Make UserSlots
             foreach ($userPoints as $user_id => $point) {
                 if ($point==0) continue;
@@ -120,14 +115,10 @@ class SlotManager
                 if ( ! $userSlot->exists()) {
                     $slot->userSlots()->save($userSlot);
                 }
-
-                if ($user['id']==$user_id) {
-                    $data['userSlot'] = $userSlot;
-                }
             }
 
-            if ($data['user']['points'] && isset($data['userSlot'])) {
-                return $data;
+            if ($user['points']) {
+                return $slot;
             }
         })->values()->filter();
     }

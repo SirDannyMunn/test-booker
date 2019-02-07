@@ -9,6 +9,11 @@ class Slot extends Model
 {
     protected $guarded = [];
 
+    public function getDatetimeObjectAttribute()
+    {
+        return Carbon::parse($this->datetime);
+    }
+
     public function userSlots()
     {
         return $this->hasMany('App\UserSlot', 'slot_id');
@@ -18,5 +23,19 @@ class Slot extends Model
     {
         return now()->endOfDay()
             ->lessThanOrEqualTo($this->datetime);
+    }
+
+    public function getBestUser()
+    {
+        $alternativeUserSlots = $this->userSlots->sortByDesc('points')->sortBy('tries')->load('user');        
+        
+        foreach($alternativeUserSlots as $userSlot) {
+
+            // Check each user availability (whether they currently have an offer open)
+            if( ! $userSlot->user->offer_open && $userSlot->tries < 1)
+                return $bestUser = $userSlot;
+        }
+
+        return null;
     }
 }
