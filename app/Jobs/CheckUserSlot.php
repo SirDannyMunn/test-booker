@@ -7,6 +7,9 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Nexmo\User\User;
+use App\Browser\Browser;
+use \Log;
 
 class CheckUserSlot implements ShouldQueue
 {
@@ -36,24 +39,26 @@ class CheckUserSlot implements ShouldQueue
      */
     public function handle()
     {
-        // if UserSlot taken
-            // Return;
+        $this->user->update(['offer_open' => false]);
+
         if ($this->userSlot->slot->taken) {
             return;
         }
 
-        $alternativeUserSlots = $this->slot->userSlots->sortByDesc('points')->sortBy('tries');
+        $eligibleUser = $this->slot->getBestUser();
 
-        // Load each user
-        // Check each user availability (whether they currently have an offer open)
-        // Disqualify any users who are being checked
+        if (!isset($eligibleUser) ) {
+            
+            // No one found :(            
+            Log::notice("Slot hasn't been taken", ['slot'=>$this->slot, 'eligible_users'=>$eligibleUsers, 'alternativeUserSlots', $alternativeUserSlots]);
+            return;
+        }
 
-        dispatch(new MakeReservation($alternativeUserSlots->first()->user, $this->userSlot));
-        // Close old browser session
-        // NEXT BEST USER
-            // Hasn't just been offered slot.
-            //
+        // Disqualify any users who have an offer open
+        dispatch(new MakeReservation($eligibleUser, $this->userSlot));
 
-        // Dispatch ReservationManager()
+        (new Browser(function($window) {
+            $window->quit();
+        }, null, null, $this->user->browser_session_id));
     }
 }

@@ -1,15 +1,18 @@
     <?php
 
     use App\Browser\Browser;
+    use App\Jobs\ScrapeDVSA;
+    use App\User;
 
     Route::get('/test', function () {
 
-        $user = \App\User::find(1);
-//        $user->notify(new \App\Notifications\ReservationMade($user, \App\Slot::find(41)));
+        return dispatch_now(new ScrapeDVSA(User::find(1)));
+        // $user = \App\User::find(1);
 
-        $userSlots = $user->userSlots->first()->slot->userSlots;
+        // $user->notify(new \App\Notifications\ReservationMade($user, $user->userSlots->first()->slot));
 
-        return $userSlots->sortByDesc('points')->sortBy('tries')->pluck('points');
+        // return $user;
+
 //        return dispatch_now(new \App\Jobs\ScrapeDVSA(\App\User::find(1)));
 
         return 'success';

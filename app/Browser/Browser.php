@@ -45,8 +45,9 @@ class Browser extends BrowserInstance
      */
     public function browse(Closure $callback, $useExistingProxy=false, $hunting=false, $existingSessionID=null)
     {
-        $this->proxy = (new ProxyManager)->getProxy($useExistingProxy, $hunting);
-//        $this->proxy = Proxy::find(60);
+        if (!$existingSessionID) {
+            $this->proxy = (new ProxyManager)->getProxy($useExistingProxy, $hunting);
+        }
 
         $this->existingSessionID = $existingSessionID;
 
@@ -73,6 +74,10 @@ class Browser extends BrowserInstance
      */
     protected function driver()
     {
+        if ($this->existingSessionID) {
+            return RemoteWebDriver::createBySessionId($this->existingSessionID, "http://127.0.0.1:9515");
+        }
+        
         $timeout = 6 * 10000; // 1 minute
 
         $url = $this->proxy->proxy;
@@ -88,10 +93,6 @@ class Browser extends BrowserInstance
             ->setCapability(WebDriverCapabilityType::PROXY, [
                 'proxyType' => 'manual', 'httpProxy' => $url, 'sslProxy' => $url, 'ftpProxy' => $url
             ]);
-
-        if ($this->existingSessionID) {
-            return RemoteWebDriver::createBySessionId($this->existingSessionID, "http://127.0.0.1:9515");
-        }
 
         // TODO - Fix this
         return RemoteWebDriver::create('http://127.0.0.1:9515', $capabilities, $timeout, $timeout);

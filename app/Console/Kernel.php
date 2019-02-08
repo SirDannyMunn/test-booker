@@ -50,7 +50,12 @@ class Kernel extends ConsoleKernel
 
         $schedule->call(function() use ($users) {
             $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
+            
             $best_users = (new User)->getBest($users, $locations);
+            // TODO - alternative (location oriented) solution
+            // Get all locations (where not been checked within 5-10 minutes?)
+            // Get 1 user account for every 2 locations
+            // Shup event using random user
 
             foreach ($best_users as $user) {
                 dispatch(new ScrapeDVSA($user))->onQueue('medium');

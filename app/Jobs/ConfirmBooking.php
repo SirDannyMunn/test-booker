@@ -25,9 +25,6 @@ class ConfirmBooking implements ShouldQueue
     /** @var Proxy */
     private $proxy;
 
-    /** @var \Tpccdaniel\DuskSecure\Browser */
-    private $window;
-
     /**
      * Create a new job instance.
      *
@@ -48,13 +45,19 @@ class ConfirmBooking implements ShouldQueue
     {
         Redis::connection('default')->funnel('DVSA')->limit(10)->then(function () {
 
+            $this->user->update(['offer_open' => false]);
+
             (new Browser)->browse(function ($window, $proxy) {
 
                 $window->click("#confirm-changes");
 
+                // Update slot taken = true
+
                 $window->checkPresent('// Validation');
 
                 $proxy->update(['last_used' => now()]);
+
+                $window->quit();
                 
             }, true, false, $this->user->browser_session_id);
             

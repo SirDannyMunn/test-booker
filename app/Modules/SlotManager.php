@@ -106,7 +106,7 @@ class SlotManager
 
             $slot = Slot::updateOrCreate(['location'=>$location->name,'datetime'=>$datetime]);
 
-            // Make UserSlots
+            // Make UserSlots (maybe abstract to userSlot model ? )
             foreach ($userPoints as $user_id => $point) {
                 if ($point==0) continue;
 

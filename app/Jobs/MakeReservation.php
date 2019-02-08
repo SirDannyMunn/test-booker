@@ -64,9 +64,8 @@ class MakeReservation implements ShouldQueue
 
                 $this->makeReservation($this->slot);
 
-                Log::notice("Notifying {$this->user->id}");
-
                 $this->user->notify(new ReservationMade($this->user, $this->slot));
+                $this->user->update(['offer_open'=>true]);
                 $this->userSlot->update(['tries'=>$this->userSlot->tries+1]);
 
                 dispatch(new CheckUserSlot(

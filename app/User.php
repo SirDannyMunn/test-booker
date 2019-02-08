@@ -2,10 +2,11 @@
 
 namespace App;
 
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Support\Collection;
 
 class User extends Authenticatable
 {
@@ -28,6 +29,11 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function getTestDateObjectAttribute()
+    {
+        return Carbon::parse($this->test_date);
+    }
 
     public function location()
     {
@@ -57,6 +63,13 @@ class User extends Authenticatable
     public function proxies()
     {
         return $this->hasMany('App\Proxy');
+    }
+
+    public function getAlternativeUsers(Collection $userSlots)
+    {
+        $alternativeUserSlots = $userSlots->sortByDesc('points')->sortBy('tries');
+
+        return $eligibleUsers = User::whereIn('id', $alternativeUserSlots->pluck('user_id'))->get();
     }
 
     /**

@@ -19,6 +19,7 @@ class CreateUsersTable extends Migration
             $table->enum('tier', ['free', 'paid', 'premium']);
             $table->boolean('priority');
             $table->boolean('booked')->default(false);
+            $table->boolean('offer_open')->default(false);
             $table->string('location');
             $table->dateTime('test_date');
             $table->string('preferred_date');
