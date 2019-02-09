@@ -132,7 +132,11 @@ class ScrapeDVSA implements ShouldQueue
 
             Log::notice('Notifying Users');
 
-            return $best = $slot->getBestUser();
+            $best = $slot->getBestUser();
+
+            if (is_null($best)) {
+                return;
+            }
 
             Log::notice($best);
 
