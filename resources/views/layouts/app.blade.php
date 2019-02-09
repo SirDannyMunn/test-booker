@@ -33,6 +33,7 @@
     </div>
 
     <!-- Scripts -->
+    @stack('scripts-top')
     <script src="{{ asset('js/app.js') }}" defer></script>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->

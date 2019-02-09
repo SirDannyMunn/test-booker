@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('scripts-top')
+<script src="https://js.stripe.com/v3/"></script>
+@endpush
+
 @section('content')
 <div class="container">
     <div class="py-5"></div>
@@ -78,4 +82,3 @@
     </div>
 </div>
 @endsection
-

@@ -117,7 +117,7 @@ trait InteractsWithDVSA
         ->pause(rand(250, 1000));
     }
 
-    public function scrapeUserLocations($locations)
+    public function scrapeLocations($locations)
     {
         $slots = collect();
         foreach ($locations as $location) { /* @var $location \App\Location */

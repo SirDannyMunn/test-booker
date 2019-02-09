@@ -15,17 +15,18 @@
     ],
     "require": {
         "php": "^7.1.3",
+        "ext-json": "*",
         "arcanedev/log-viewer": "^4.6",
         "doctrine/dbal": "^2.8",
         "fideloper/proxy": "^4.0",
         "guzzlehttp/guzzle": "^6.3",
+        "laravel/cashier": "^9.0",
         "laravel/framework": "5.7.*",
         "laravel/horizon": "^2.0",
         "laravel/tinker": "^1.0",
         "nexmo/client": "^1.5",
         "predis/predis": "~1.0",
-        "tpccdaniel/dusk-secure": "@dev",
-        "ext-json": "*"
+        "tpccdaniel/dusk-secure": "@dev"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.5",

@@ -6,7 +6,15 @@
 
     Route::get('/test', function () {
 
-        return dispatch_now(new ScrapeDVSA(User::find(1)));
+        \Stripe\Stripe::setApiKey("sk_test_BZHmui7JytqwGDhmEYZZjVLs");
+
+        return \Stripe\PaymentIntent::create([
+            "amount" => 30,
+            "currency" => "gbp",
+            "allowed_source_types" => ["card"],
+        ]);
+
+        // return dispatch_now(new ScrapeDVSA(User::find(1)));
         // $user = \App\User::find(1);
 
         // $user->notify(new \App\Notifications\ReservationMade($user, $user->userSlots->first()->slot));
