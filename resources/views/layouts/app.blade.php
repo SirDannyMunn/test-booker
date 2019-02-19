@@ -11,10 +11,12 @@
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet" type="text/css">
+    {{-- <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet" type="text/css"> --}}
+    <link href="https://fonts.googleapis.com/css?family=Cabin" rel="stylesheet">
 
     {{----}}
     {{--<link href="https://rsms.me/inter/inter-ui.css" rel="stylesheet">--}}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css" rel="stylesheet">
     {{--<link rel="stylesheet"--}}
           {{--href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">--}}
     {{--<link rel="stylesheet" href="css/default.css" id="theme-color">--}}
@@ -22,17 +24,23 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/all.css') }}" rel="stylesheet">
+    @stack('styles-bottom')
 </head>
 <body>
     <div id="app">
-        @include('nav')
 
-        <main class="">
+        {{--Nav--}}
+        @section('nav')
+            @include('nav')
+        @show
+
+        <main>
             @yield('content')
         </main>
     </div>
 
     <!-- Scripts -->
+    <script src="https://js.stripe.com/v3/"></script>
     @stack('scripts-top')
     <script src="{{ asset('js/app.js') }}" defer></script>
 

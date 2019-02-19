@@ -6,13 +6,9 @@
 
     Route::get('/test', function () {
 
-        \Stripe\Stripe::setApiKey("sk_test_BZHmui7JytqwGDhmEYZZjVLs");
+        return config('settings.plans.free')['price'];
 
-        return \Stripe\PaymentIntent::create([
-            "amount" => 30,
-            "currency" => "gbp",
-            "allowed_source_types" => ["card"],
-        ]);
+        return view('payment');
 
         // return dispatch_now(new ScrapeDVSA(User::find(1)));
         // $user = \App\User::find(1);
@@ -29,6 +25,8 @@
     Route::get('/', function () {
         return view('welcome');
     });
+    
+    Route::get('/payment', 'PaymentsController@index');
 
     Route::get('user/accept_booking', function() {
 //        return 'test';

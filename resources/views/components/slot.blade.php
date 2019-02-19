@@ -4,5 +4,5 @@
     style="line-height: 2;">
     {{ $slot->datetime_object->format('l, j F Y g:ia') }}
     <span><i class=""></i></span>
-    <a href="javascript:void(0);" class="btn btn-outline-primary float-right">More</a>
+    <a href="javascript:void(0);" class="btn btn-outline-primary float-right">Book</a>
 </p>

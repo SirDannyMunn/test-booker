@@ -1,10 +1,129 @@
-
 // Fonts
-@import url('https://fonts.googleapis.com/css?family=Nunito');
+@import url("https://fonts.googleapis.com/css?family=Nunito");
 
+$light: #bbbbbb;
+$lightBlue: #9fcbda;
+
+@mixin lb-gradient() {
+    background: $lightBlue;
+    background: -moz-linear-gradient(top, rgba(239,245,247,1) 0%, rgba(239,245,247,1) 22%, rgba(255,255,255,1) 25%, rgba(255,255,255,1) 100%);
+    background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(239,245,247,1)), color-stop(18%, rgba(239,245,247,1)), color-stop(18%, rgba(255,255,255,1)), color-stop(100%, rgba(255,255,255,1)));
+    background: -webkit-linear-gradient(top, rgba(239,245,247,1) 0%, rgba(239,245,247,1) 22%, rgba(255,255,255,1) 25%, rgba(255,255,255,1) 100%);
+    background: -o-linear-gradient(top, rgba(239,245,247,1) 0%, rgba(239,245,247,1) 22%, rgba(255,255,255,1) 25%, rgba(255,255,255,1) 100%);
+    background: -ms-linear-gradient(top, rgba(239,245,247,1) 0%, rgba(239,245,247,1) 22%, rgba(255,255,255,1) 25%, rgba(255,255,255,1) 100%);
+    background: linear-gradient(to bottom, rgba(239,245,247,1) 0%, rgba(239,245,247,1) 22%, rgba(255,255,255,1) 25%, rgba(255,255,255,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eff5f7', endColorstr='#ffffff', GradientType=0 );
+}
+
+.payment-header {
+    // background-position: 2px -1031px;
+    // background-size: cover;
+    // background-repeat: no-repeat;
+    // /* background-attachment: fixed; */
+    // opacity: 0.5;
+    // /* background-color: aliceblue; */
+    // background-image: url(http://browser-automation.test:8000/images/hispter_shapes/01.jpg);
+}
+
+body {
+    background-color: grey;
+    font-family: 'Cabin', sans-serif;
+}
+
+#content {
+    width: 100%;
+    // height: 500px;
+    @include lb-gradient();
+}
 
 @media (min-width: 1200px) {
     .container {
         max-width: 1575px;
     }
+}
+
+.close {
+    font-size: 2.5rem;
+}
+
+.modal-body {
+    padding: 5rem 5rem 7rem !important;
+}
+
+.modal-header {
+    padding: 2rem 1rem !important;
+}
+
+@media (min-width: 576px) {
+    .modal-dialog {
+        max-width: 1100px !important;
+        margin: 1.75rem auto;
+    }
+}
+
+.payments-container {
+    max-width: 930px !important;
+}
+
+.payment-section-label {
+    padding: 37px 0;
+}
+
+.payment-items-card {
+    -webkit-box-shadow: 4px 35px 65px -18px rgba(0,0,0,0.27);
+    -moz-box-shadow: 4px 35px 65px -18px rgba(0,0,0,0.27);
+    box-shadow: 4px 35px 65px -18px rgba(0,0,0,0.27);
+    color: black;
+
+    .total-cost {
+        border-top: 1px rgba(159, 203, 218, 0.2) solid;
+    }
+
+    .table-responsive {
+        border-radius: 6px;
+    }
+}
+
+.table th, .table td {
+    border-top: unset !important;
+}
+
+.table thead th {
+    border-bottom: unset !important;
+}
+
+.pt-6  {
+    padding-top: 7rem !important; 
+}
+
+.pb-7 {
+    padding-bottom: 5rem !important; 
+}
+
+.payments-container small {
+    color: $light;
+}
+
+.form-group .required .control-label:after {
+    content:"*";color:red;
+}
+
+#coupon {
+    margin-bottom: 3rem !important;
+    margin-top: 6rem !important;
+}
+
+#payments-banner img {
+    padding: 16px 0;
+    margin-left: -8px;
+    width: 40px;
+}
+
+#payment-details input {
+    margin: 15px 0;
+
+}
+
+.card-button {
+    box-shadow: 4px 12px 65px -18px rgb(72, 7, 200);
 }

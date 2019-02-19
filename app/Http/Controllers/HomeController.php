@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Slot;
-use Illuminate\Http\Request;
 use App\Location;
+use Illuminate\Http\Request;
+use App\Http\Controllers\PaymentsController;
 
 class HomeController extends Controller
 {

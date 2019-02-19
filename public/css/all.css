@@ -1,7 +1,108 @@
+@import url(https://fonts.googleapis.com/css?family=Nunito);body {
+  background-color: grey;
+  font-family: 'Cabin', sans-serif;
+}
+
+#content {
+  width: 100%;
+  background: #9fcbda;
+  background: -webkit-gradient(left top, left bottom, color-stop(0%, #eff5f7), color-stop(18%, #eff5f7), color-stop(18%, white), color-stop(100%, white));
+  background: -webkit-gradient(linear, left top, left bottom, from(#eff5f7), color-stop(22%, #eff5f7), color-stop(25%, white), to(white));
+  background: linear-gradient(to bottom, #eff5f7 0%, #eff5f7 22%, white 25%, white 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eff5f7', endColorstr='#ffffff', GradientType=0 );
+}
+
 @media (min-width: 1200px) {
   .container {
     max-width: 1575px;
   }
+}
+
+.close {
+  font-size: 2.5rem;
+}
+
+.modal-body {
+  padding: 5rem 5rem 7rem !important;
+}
+
+.modal-header {
+  padding: 2rem 1rem !important;
+}
+
+@media (min-width: 576px) {
+  .modal-dialog {
+    max-width: 1100px !important;
+    margin: 1.75rem auto;
+  }
+}
+
+.payments-container {
+  max-width: 930px !important;
+}
+
+.payment-section-label {
+  padding: 37px 0;
+}
+
+.payment-items-card {
+  -webkit-box-shadow: 4px 35px 65px -18px rgba(0, 0, 0, 0.27);
+  box-shadow: 4px 35px 65px -18px rgba(0, 0, 0, 0.27);
+  color: black;
+}
+
+.payment-items-card .total-cost {
+  border-top: 1px rgba(159, 203, 218, 0.2) solid;
+}
+
+.payment-items-card .table-responsive {
+  border-radius: 6px;
+}
+
+.table th,
+.table td {
+  border-top: unset !important;
+}
+
+.table thead th {
+  border-bottom: unset !important;
+}
+
+.pt-6 {
+  padding-top: 7rem !important;
+}
+
+.pb-7 {
+  padding-bottom: 5rem !important;
+}
+
+.payments-container small {
+  color: #bbbbbb;
+}
+
+.form-group .required .control-label:after {
+  content: "*";
+  color: red;
+}
+
+#coupon {
+  margin-bottom: 3rem !important;
+  margin-top: 6rem !important;
+}
+
+#payments-banner img {
+  padding: 16px 0;
+  margin-left: -8px;
+  width: 40px;
+}
+
+#payment-details input {
+  margin: 15px 0;
+}
+
+.card-button {
+  -webkit-box-shadow: 4px 12px 65px -18px #4807c8;
+          box-shadow: 4px 12px 65px -18px #4807c8;
 }
 
 
