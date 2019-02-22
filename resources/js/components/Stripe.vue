@@ -1,21 +1,23 @@
 <template>
 <div>
-    <form action="/charge" method="post" id="payment-form">
-        <div class="form-row">
-            
-            <!-- <label for="card-element">
-                Credit or debit card
-            </label> -->
-            <div id="card-element" class="form-control">
-                <!-- A Stripe Element will be inserted here. -->
-            </div>
+	<div class="form-row">
+		
+		<div id="card-element" class="form-control" style="margin-top: 15px;">
+			<!-- A Stripe Element will be inserted here. -->
+		</div>
 
-            <!-- Used to display Element errors. -->
-            <div id="card-errors" role="alert"></div>
-        </div>
+		<!-- Used to display Element errors. -->
+		<div id="card-errors" role="alert"></div>
+	</div>
 
-        <!-- <button id="card-button" :data-secret="clientSecret">Submit Payment</button> -->
-    </form>
+	<div class="w-100 text-center py-5" style="padding-top:10rem;">
+		<button class="btn btn-primary m-auto py-2" 
+				:data-secret=" clientSecret"
+				id="card-button" 
+				type="button">
+			<img :src="$root.url('icons/padlock_3_light.png')" width="41px" class="pr-2"> <span class="pl-3 pr-5">PLACE YOUR ORDER</span><br>
+		</button>
+	</div>
 </div>
 </template>
 
@@ -60,37 +62,33 @@ export default {
 		};
 
 		// Create an instance of the card Element.
-		const card = elements.create("card", { style });
+		const cardElement = elements.create("card", { style });
 
 		// Add an instance of the card Element into the `card-element` <div>.
-		card.mount("#card-element");
+		cardElement.mount("#card-element");
 
 		const cardholderName = document.getElementById("cardholder-name");
 		const cardButton = document.getElementById("card-button");
 		const clientSecret = cardButton.dataset.secret;
 
 		cardButton.addEventListener("click", async ev => {
-			const { paymentIntent, error } = await stripe.handleCardPayment(
-				clientSecret,
-				cardElement,
-				{
-					source_data: {
-						owner: { name: cardholderName.value }
-					}
-				}
-			);
+
+			const {token, error} = await stripe.createToken(cardElement);
 
 			if (error) {
-				// Display error.message in your UI.
+				// Inform the customer that there was an error.
+				const errorElement = document.getElementById('card-errors');
+				errorElement.textContent = error.message;
 			} else {
-				// The payment has succeeded. Display a success message.
+
+				window.axios.post('payments/customer', {
+					token: token.id
+				}).then( () => {
+					window.location.replace(`${this.$root.url('home')}`);
+				});
 			}
 		});
 	},
-	methods: {
-		// Create a token or display an error when the form is submitted.
-		createToken($e) {}
-	}
 };
 </script>
 

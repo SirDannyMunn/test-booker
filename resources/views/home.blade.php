@@ -23,14 +23,19 @@
 
                         <h5>{{ $name }}</h5>
                         
-                        <div class="card card-light p-2">
-                            @foreach($availableUserSlots->where('location', $name) as $availableUserSlot)
-                                @include('components.slot', ['slot' => $availableUserSlot])       
-                            @endforeach
-                        </div>
-                            
-                        @foreach($remainingLocationSlots as $slot)        
-                            @include('components.slot', ['slot' => $slot])       
+                        <hr style="margin-top: 0;">
+                        
+                        <h5>Top Picks For You</h5>
+                        @forelse ($availableUserSlots->where('location', $name) as $availableUserSlot)
+                            <test-slot datetime="{{ $availableUserSlot->datetime_object->format('l, j F Y g:ia') }}"></test-slot>
+                        @empty
+                            Suitable slots will show here when they arise
+                        @endforelse
+                        
+                        <hr>    
+                                
+                            @foreach($remainingLocationSlots as $slot)        
+                                <test-slot datetime="{{ $slot->datetime_object->format('D, j F Y g:ia') }}"></test-slot>
                         @endforeach
                     @endforeach
                 </div>
@@ -46,55 +51,11 @@
                     
                     {{-- Plan --}}
                     <h5>Your Current Plan: </h5>
-                    <p>{{ ucfirst($user->tier) }} <button data-toggle="modal" data-target="#planModal" class="btn btn-sm float-right btn-primary"><strong><img src="{{ url('icons/badge.png') }}" width="14px"> Upgrade</strong></button></p>
+                    <p>{{ ucfirst($user->tier) }} 
+                        <button data-toggle="modal" data-target="#planModal" class="btn btn-sm float-right btn-primary"><strong><img src="{{ url('icons/badge.png') }}" width="14px"> Upgrade</strong></button>
+                    </p>
                 
-                    <!-- Modal -->
-                    <div class="modal fadeIn delay-2s slower" id="planModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header" style="border-bottom:unset;">
-                            <h2 class="col-12 modal-title text-center" id="exampleModalLongTitle">
-                                <div style="width: 45px; height:50px" class="float-left"></div>
-                                Pick a Plan!
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>        
-                            </h2>
-
-                            </div>    
-                            <div class="modal-body">
-                            
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        @include('components.price_card', [
-                                            'tier'=>'free','colour'=>'secondary','price'=>'£0', 
-                                        ])
-                                    </div>
-                                    <div class="col-md-4">
-                                        @include('components.price_card', [
-                                            'tier'=>'basic','colour'=>'success','price'=>'£9.99', 
-                                            'features'=>[
-                                                '3 additional test centres',
-                                                'searches every 9 minutes'
-                                            ],
-                                        ])
-                                    </div>
-                                    <div class="col-md-4">
-                                            @include('components.price_card', [
-                                                'tier'=>'premium','colour'=>'success','price'=>'£19.99', 
-                                                'features'=> [
-                                                    '5 additional test centres',
-                                                    'Searches every 5 minutes',
-                                                    'Get first priority'
-                                                ],
-                                            ])
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                        </div>
-                    </div>
+                    @include('components.plan')
 
                     <hr style="margin-top: 0;">
 

@@ -4,8 +4,6 @@
 
 @section('content')
 
-
-
 {{-- Payment navbar --}}
 <div>
     <nav class="navbar navbar-light navbar-expand-md navigation-clean">
@@ -23,7 +21,9 @@
     </nav>
 </div>
 
-<div id="content">
+<div id="content">        
+
+    @include('components.plan')
 
     {{-- Payment page --}}
     <div class="payment-header">
@@ -42,9 +42,10 @@
                         </thead>
                         <tbody >
                             <tr>
-                                <td class="text-left">Premium Memberhip</td>
-                                <td>£19</td>
-                                <td>Change</td>
+                                <td class="text-left">{{ ucfirst($plan['name']) }}</td>
+                                <td>£{{ $plan['price'] }}</td>
+                                <td><a data-toggle="modal" data-target="#planModal" href="#">Change</a></td>
+                        
                             </tr>
                             <tr class="total-cost">
                                 <td></td>
@@ -53,7 +54,7 @@
                                     <div>
                                         <small>Total</small> <br>
                                         <strong>
-                                            £19.99
+                                            £{{ $plan['price'] }}
                                         </strong>
                                     </div>
                                 </td>
@@ -67,7 +68,7 @@
 </div>
 
 <div id="coupon" class="my-5 container text-center payments-container">
-    <div class="my-5 p-3 card m-auto"><span class="text-primary">Have a discount code? Click here to enter it.</span></div>
+    <div class="my-5 p-3 card m-auto"><a href="#" class="text-primary">Have a discount code? Click here to enter it.</a></div>
 </div>
 
 {{-- Plan selection --}}
@@ -99,23 +100,17 @@
             <h5 class="payment-section-label">Personal Info</h5>
             <div class="row">
                 <div class="col-md-12" id="payment-details">
+
                     <div class="form-group">
                         <h5 class="p-1 required control-label">Email Address</h5><small>We will send the purchase reciept to this address</small>
-                        <input type="email" class="form-control" required></div>
+                        <input type="email" class="form-control" value="{{ auth()->user()->email }}" required></div>
                         <div class="form-group">
                             <h5 class="p-1 required control-label">Full Name</h5><small>We will use this for the billing information</small> 
-                            <input type="text" class="form-control" required></div>
+                            <input id="cardholder-name" type="text" class="form-control" value="{{ auth()->user()->name }}" required></div>
                 <div class="form-group">
                     <h5 class="p-1 required control-label">Payment Details</h5><small>We will use this information to make the payment</small>
                     <stripe-card client-secret="{{ $intent->client_secret }}"></stripe-card>
                 </div>
-                <div class="w-100 text-center py-5">
-                    <button class="btn btn-primary m-auto py-2" 
-                    id="card-button" 
-                    data-secret="{{ $intent->client_secret }}"
-                    type="button">
-                    <img src="{{ url('icons/padlock_3_light.png') }}" width="41px" class="pr-2"> <span class="pl-3 pr-5">PLACE YOUR ORDER</span><br>
-                </button>
             </div>
         </div>
     </div>
@@ -128,7 +123,7 @@
         <div class="row py-5">
             <div class="col-md-6"><img src="{{ url('icons/padlock_4.png') }}">
                 <h5>Your Information is Safe</h5>
-                <small>We will not use your information for anything other than this purchase. Payment is provided via <a href="https://stripe.com">Stripe</a>.</small>
+                <small>We will not use your information for anything other than this purchase with will be taken when a booking is made.</small>
             </div>
             <div class="col-md-6"><img src="{{ url('icons/protected.png') }}">
                 <h5>Secure Checkout</h5>

@@ -4,6 +4,7 @@ require('./bootstrap');
 window.Vue = require('vue');
 
 Vue.component('stripe-card', require('./components/Stripe.vue'));
+Vue.component('test-slot', require('./components/Slot.vue'));
 
 // const files = require.context('./', true, /\.vue$/i)
 
@@ -17,6 +18,11 @@ const app = new Vue({
     el: '#app',
     mounted() {
         feather.replace()
+    },
+    methods: {
+        url(path) {
+            return window.app.url + '/' + path
+        }
     }
 });
 

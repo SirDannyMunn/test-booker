@@ -8,20 +8,17 @@ use Illuminate\Http\Request;
 
 class PaymentsController extends Controller
 {
-    private $user;
-
-    public function __construct()
-    {
-        $this->user = auth()->user();
-    }
-
     public function index()
     {
+        if ( !request('plan') || request('plan')==auth()->user()->tier ) {
+            // Do something
+        }
+
         $plan = config( 'settings.plans.' . request('plan') );
 
-        $intent = $this->getPaymentIntent($plan['price']);
+        $intent = $this->getPaymentIntent($plan['price'] * 100);
 
-        return view('payment', ['intent' => $intent]);
+        return view('payment', ['intent' => $intent, 'plan' => $plan]);
     }
 
     public function getPaymentIntent($price)
@@ -33,19 +30,5 @@ class PaymentsController extends Controller
             "currency" => "gbp",
             "allowed_source_types" => ["card"],
         ]);
-    }
-
-    public function signup()
-    {
-        $this->user->createAsStripeCustomer();
-    }
-
-    public function charge()
-    {
-        if ( ! $this->user->hasCardOnFile()) {
-            return 'EH EH EH.';
-        }
-        
-        $this->user->charge($amount);
     }
 }
