@@ -5,10 +5,7 @@
         <div class="text-muted mt-4">per booking</div>
         <ul class="list-unstyled ">
             <li>Access to the web app</li>
-            <li>Unlimited notifications</li>
-            <li>Get notified immediately</li>
-            @if($tier!='Free')<li class="text-{{$colour}}">Full support</li>@endif
-            @if($tier!='Free')<li class="text-{{$colour}}">No charge if no booking</li>@endif
+            <li>See live cancellations</li>
             @isset($features)
                 @foreach($features as $additionalFeature)
                     <li class="text-{{$colour}}">{{$additionalFeature}}</li>

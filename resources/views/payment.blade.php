@@ -23,7 +23,7 @@
 
 <div id="content">        
 
-    @include('components.plan')
+    @include('components.plans_modal')
 
     {{-- Payment page --}}
     <div class="payment-header">

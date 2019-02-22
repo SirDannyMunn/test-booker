@@ -1,32 +1,38 @@
 <?php
 
+$features = [
+    'Access to the web app',
+    'See live cancellations'
+
+];
+
 return [
     'plans' => [
         'free' => [
             'price' => 0,
             'pennies' => 0,
-            // 'price' => 0,
-            'name' => 'Just Checking :)'
+            'colour' => 'secondary',
+            'name' => 'Freewheeler',
+            'features' => [
+            ],
         ],
         'basic' => [
             'price' => 19.99,
             'pennies' => 1999,
-            // 'price' => 19.99,
-             'name' => 'Eager', 
+            'colour' => 'success',
+            'name' => 'Fast', 
             'features'=> [
-                '3 additional test centres',
-                'searches every 9 minutes'
             ]
         ],
         'premium' => [
             'price' => 29.99,
             'pennies' => 2999,
-            // 'price' => 29.99,
-            'name' => 'Now Please!', 
+            'colour' => 'success',
+            'name' => 'Quickest!', 
             'features'=> [
-                '5 additional test centres',
-                'Searches every 5 minutes',
-                'Get first priority'
+                'Select any test from dashboard',
+                'Test in 2 weeks or full refund',
+                'Get first priority',
             ]
         ]
     ]

@@ -27,15 +27,23 @@
                         
                         <h5>Top Picks For You</h5>
                         @forelse ($availableUserSlots->where('location', $name) as $availableUserSlot)
-                            <test-slot datetime="{{ $availableUserSlot->datetime_object->format('l, j F Y g:ia') }}"></test-slot>
+ 
+                            @php
+                                $numberFormatter = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
+                                $place = $numberFormatter->format($availableUserSlot->currentUserPlace());   
+                            @endphp
+
+                            <small>Your are in {{ $place }} Place for this slot</small>
+
+                            <test-slot datetime="{{ $availableUserSlot->datetime_object->format('D, j F Y g:ia') }}"></test-slot>
                         @empty
                             Suitable slots will show here when they arise
                         @endforelse
                         
                         <hr>    
                                 
-                            @foreach($remainingLocationSlots as $slot)        
-                                <test-slot datetime="{{ $slot->datetime_object->format('D, j F Y g:ia') }}"></test-slot>
+                        @foreach($remainingLocationSlots as $slot)        
+                            <test-slot datetime="{{ $slot->datetime_object->format('D, j F Y g:ia') }}"></test-slot>
                         @endforeach
                     @endforeach
                 </div>
@@ -55,7 +63,7 @@
                         <button data-toggle="modal" data-target="#planModal" class="btn btn-sm float-right btn-primary"><strong><img src="{{ url('icons/badge.png') }}" width="14px"> Upgrade</strong></button>
                     </p>
                 
-                    @include('components.plan')
+                    @include('components.plans_modal')
 
                     <hr style="margin-top: 0;">
 

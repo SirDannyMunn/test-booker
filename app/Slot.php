@@ -38,4 +38,11 @@ class Slot extends Model
 
         return null;
     }
+
+    public function currentUserPlace()
+    {
+        return $this->userSlots->sortByDesc('points')->search(function($item) {
+            return $item->id == auth()->id();
+        }) + 1;
+    }
 }

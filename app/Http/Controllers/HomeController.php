@@ -28,7 +28,9 @@ class HomeController extends Controller
     {
         $user = auth()->user();
 
-        $availableUserSlots = $user->userSlots->where('slot.taken', false)->pluck('slot');
+        // $availableUserSlots = $user->userSlots->where('slot.taken', false)->pluck('slot');
+        
+        $availableUserSlots = $user->userSlots->where('slot.taken', false)->load('slot.userSlots')->pluck('slot');
 
         return view('home', [
             'user' => $user,

@@ -16,7 +16,14 @@
             <div class="modal-body">
 
                 <div class="row">
-                    <div class="col-md-4">
+                    @foreach(config('settings.plans') as $plan)
+                        <div class="col-md-4">
+                            @include('components.price_card', 
+                                ['tier'=>$plan['name'], 'colour'=>$plan['colour'], 'price'=>"£{$plan['price']}", "features"=>$plan['features']]
+                            )
+                        </div>
+                    @endforeach
+                    {{-- <div class="col-md-4">
                         @include('components.price_card', [ 'tier'=>'free','colour'=>'secondary','price'=>'£0', ])
                     </div>
                     <div class="col-md-4">
@@ -26,7 +33,7 @@
                     <div class="col-md-4">
                         @include('components.price_card', [ 'tier'=>'premium','colour'=>'success','price'=>'£19.99', 'features'=> [ '5 additional
                         test centres', 'Searches every 5 minutes', 'Get first priority' ], ])
-                    </div>
+                    </div> --}}
                 </div>
 
             </div>
