@@ -13,13 +13,13 @@
                 </h2>
 
             </div>
-            <div class="modal-body">
+            <div class="modal-body plan-modal-body">
 
                 <div class="row">
-                    @foreach(config('settings.plans') as $plan)
+                    @foreach(config('settings.plans') as $tier => $plan)
                         <div class="col-md-4">
                             @include('components.price_card', 
-                                ['tier'=>$plan['name'], 'colour'=>$plan['colour'], 'price'=>"£{$plan['price']}", "features"=>$plan['features']]
+                                ['tier'=>$tier, 'plan'=>$plan['name'], 'colour'=>$plan['colour'], 'price'=>"£{$plan['price']}", "features"=>$plan['features']]
                             )
                         </div>
                     @endforeach

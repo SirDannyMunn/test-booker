@@ -18,4 +18,13 @@ class UserSlot extends Model
     {
         return $this->hasOne('App\Slot', 'id', 'slot_id');
     }
+
+    public function promote()
+    {
+        $newScore = $this->points + 100;
+
+        return $this->update([
+            'points' => $newScore, 'tries' => 0
+        ]);
+    }
 }

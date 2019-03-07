@@ -26,7 +26,7 @@ class ReservationMade extends Notification
         $this->date = Carbon::parse($slot['date'])->format('d/m/y h:m');
 
         $actionCode = uniqid() . str_random(10);
-        $this->actionUrl = url("user/accept_booking?user={$actionCode}");
+        $this->actionUrl = url("slot/accept?user={$actionCode}");
 
         $this->user->action_code = $actionCode;
         $this->user->save();

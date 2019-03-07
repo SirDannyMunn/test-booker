@@ -5,6 +5,7 @@ window.Vue = require('vue');
 
 Vue.component('stripe-card', require('./components/Stripe.vue'));
 Vue.component('test-slot', require('./components/Slot.vue'));
+Vue.component('slot-modal', require('./components/SlotModal.vue'));
 
 // const files = require.context('./', true, /\.vue$/i)
 
@@ -25,4 +26,17 @@ const app = new Vue({
         }
     }
 });
+
+$(function () {
+    $('[data-toggle="popover"]').popover({
+        container: 'body',
+        trigger: 'focus',
+        placement: 'auto'
+    })      
+})
+
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+})
+  
 

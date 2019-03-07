@@ -14,6 +14,10 @@ class PaymentsController extends Controller
             // Do something
         }
 
+        if ( !auth()->user()->canChangePlan()) {
+            return "You've already used it now pal.";
+        }
+
         $plan = config( 'settings.plans.' . request('plan') );
 
         $intent = $this->getPaymentIntent($plan['price'] * 100);

@@ -27,7 +27,7 @@ class Slot extends Model
 
     public function getBestUser()
     {
-        $alternativeUserSlots = $this->userSlots->sortByDesc('points')->sortBy('tries')->load('user');        
+        $alternativeUserSlots = $this->rankUserSlots()->load('user');        
         
         foreach($alternativeUserSlots as $userSlot) {
 
@@ -39,10 +39,35 @@ class Slot extends Model
         return null;
     }
 
+    public function rankUserSlots()
+    {
+        return $this->userSlots->sortByDesc('points')->sortBy('tries');        
+    }
+
     public function currentUserPlace()
     {
-        return $this->userSlots->sortByDesc('points')->search(function($item) {
+        return $this->rankUserSlots()->values()->search(function($item) {
             return $item->id == auth()->id();
         }) + 1;
+    }
+
+    public function currentUserSlot()
+    {
+        return $this->userSlots->where('user_id', auth()->id())->first();
+    }
+
+    // public function scopePromotable($query) {
+    //     return $query->where('user.id', '<', 99);
+    // }
+
+    public function promotable()
+    {
+        foreach($this->userSlots as $userSlot) {
+            if ($userSlot->points >= 99) {
+                return 0;
+            }
+        }
+
+        return 1;
     }
 }

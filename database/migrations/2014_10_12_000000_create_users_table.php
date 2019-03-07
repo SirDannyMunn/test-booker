@@ -29,6 +29,7 @@ class CreateUsersTable extends Migration
             // TODO - Make unique in prod
             $table->string('dl_number');
             $table->string('ref_number');
+            $table->boolean('details_valid')->default(true);
             $table->string('browser_session_id')->nullable();
             $table->string('email')->unique();
             $table->string('phone_number')->unique();

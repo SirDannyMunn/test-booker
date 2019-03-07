@@ -3,7 +3,6 @@
 $features = [
     'Access to the web app',
     'See live cancellations'
-
 ];
 
 return [
@@ -32,7 +31,6 @@ return [
             'features'=> [
                 'Select any test from dashboard',
                 'Test in 2 weeks or full refund',
-                'Get first priority',
             ]
         ]
     ]

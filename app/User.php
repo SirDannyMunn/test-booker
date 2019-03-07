@@ -66,6 +66,11 @@ class User extends Authenticatable
         return $this->hasMany('App\Proxy');
     }
 
+    public function canChangePlan()
+    {
+        return $this->booked==0;
+    }
+
     public function getAlternativeUsers(Collection $userSlots)
     {
         $alternativeUserSlots = $userSlots->sortByDesc('points')->sortBy('tries');
@@ -93,6 +98,7 @@ class User extends Authenticatable
                     }
                 }
             }
+            
             // Sort to get most points
             $sorted = $location_points->sortBy('points');
             $best_user = $sorted->keys()->last();
