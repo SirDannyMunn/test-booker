@@ -1,14 +1,18 @@
 <template>
-<div>
+<div class="row">
 
 	<small v-if="place">Your are in <strong>{{ place }} Place</strong> for this slot</small>
 
-	<p style="line-height: 2;">
-		{{ datetime }}
-		<span><i class=""></i></span>
+	<div class="col-9">
+		<p style="line-height: 2;">
+			{{ datetime }}
+		</p>
+	</div>
+
+	<div class="col-3">
 		<button v-if="!buttonDisabled" @click="$root.$emit('slotButtonClicked', $props)" class="btn btn-outline-primary float-right">Book</button>
 		<button v-else class="btn btn-outline-primary float-right">....</button>
-	</p>
+	</div>
 </div>
 </template>
 

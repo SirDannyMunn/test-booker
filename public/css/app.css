@@ -22,8 +22,8 @@
   font-size: 2.5rem;
 }
 
-.plan-modal {
-  padding: 5rem 5rem 7rem !important;
+.plan-modal-body {
+  padding: 8% 10% 9% !important;
 }
 
 .slot-modal {
@@ -107,5 +107,44 @@
 .card-button {
   -webkit-box-shadow: 4px 12px 65px -18px #4807c8;
           box-shadow: 4px 12px 65px -18px #4807c8;
+}
+
+/* Collapse Tabs */
+
+/* small device */
+
+@media (max-width: 768px) {
+  .device-big {
+    display: none;
+  }
+
+  .device-small {
+    display: block;
+  }
+
+  .tab-content > .tab-pane:not(.active) {
+    display: none !important;
+  }
+
+  .tab-pane .active {
+    display: block !important;
+  }
+}
+
+/* big device */
+
+@media only screen and (min-width: 768px) {
+  .device-big,
+  .tab-content > .tab-pane {
+    display: block !important;
+  }
+
+  .device-small {
+    display: none !important;
+  }
+
+  .tab-content > .tab-pane {
+    display: block;
+  }
 }
 

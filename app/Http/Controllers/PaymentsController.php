@@ -15,7 +15,7 @@ class PaymentsController extends Controller
         }
 
         if ( !auth()->user()->canChangePlan()) {
-            return "You've already used it now pal.";
+            // return "You've already used it now pal.";
         }
 
         $plan = config( 'settings.plans.' . request('plan') );

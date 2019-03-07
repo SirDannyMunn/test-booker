@@ -48818,7 +48818,7 @@ exports = module.exports = __webpack_require__(3)(false);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
 
 // exports
 
@@ -48829,6 +48829,10 @@ exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
 //
 //
 //
@@ -48875,7 +48879,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
+  return _c("div", { staticClass: "row" }, [
     _vm.place
       ? _c("small", [
           _vm._v("Your are in "),
@@ -48884,10 +48888,13 @@ var render = function() {
         ])
       : _vm._e(),
     _vm._v(" "),
-    _c("p", { staticStyle: { "line-height": "2" } }, [
-      _vm._v("\n\t\t" + _vm._s(_vm.datetime) + "\n\t\t"),
-      _vm._m(0),
-      _vm._v(" "),
+    _c("div", { staticClass: "col-9" }, [
+      _c("p", { staticStyle: { "line-height": "2" } }, [
+        _vm._v("\n\t\t\t" + _vm._s(_vm.datetime) + "\n\t\t")
+      ])
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "col-3" }, [
       !_vm.buttonDisabled
         ? _c(
             "button",
@@ -48907,14 +48914,7 @@ var render = function() {
     ])
   ])
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("span", [_c("i", {})])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {

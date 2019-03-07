@@ -32,7 +32,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('horizon:snapshot')->everyMinute();
 
-        $users = User::where('booked', false)
+        $users = User::where('booked', false)->where('details_valid', true)
         ->whereDate('test_date', '>', now()->endOfDay()->addWeekdays(3))
         ->get();
 
