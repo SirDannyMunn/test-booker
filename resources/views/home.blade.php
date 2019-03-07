@@ -33,7 +33,7 @@
             <div class="tab-pane col-xs-12 col-sm-4" id="profile">...profile...</div>
             <div class="tab-pane col-xs-12 col-sm-4" id="messages">...messages...</div> --}}
 
-            <div role="tabpanel" id="slots" class="tab-pane active col-md-4 my-1">
+            <div role="tabpanel" id="slots" class="tab-pane active col my-1">
                 <div class="card">
                     <div class="card card-body">
                         <h3 class="card-title">Test Dates</h3>
@@ -100,7 +100,7 @@
             </div>
             
             {{-- Details --}}
-            <div role="tabpanel" id="details" class="tab-pane col-md-4 my-1">
+            <div role="tabpanel" id="details" class="tab-pane col my-1">
                 <div class="card">
                     <div class="card card-body">
                         <h3 class="card-title">Your Details</h3>
@@ -143,7 +143,7 @@
             </div>
 
             {{-- Locations --}}
-            <div role="tabpanel" id="locations" class="tab-pane col-md-4 my-1">
+            <div role="tabpanel" id="locations" class="tab-pane col my-1">
                 <div class="card">
                     <div class="card card-body">
                         <h3 class="card-title">Your Locations</h3>

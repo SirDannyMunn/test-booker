@@ -113,7 +113,7 @@
 
 /* small device */
 
-@media (max-width: 768px) {
+@media (max-width: 769px) {
   .device-big {
     display: none;
   }
@@ -133,7 +133,7 @@
 
 /* big device */
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 769px) {
   .device-big,
   .tab-content > .tab-pane {
     display: block !important;
