@@ -19,9 +19,9 @@
 
     <nav>
         <div class="nav nav-tabs device-small" id="nav-tab" role="tablist">
-            <a class="nav-item nav-link active" data-toggle="tab" href="#slots" role="tab" aria-controls="nav-home" aria-selected="true">Home</a>
-            <a class="nav-item nav-link" data-toggle="tab" href="#details" role="tab" aria-controls="nav-profile" aria-selected="false">Profile</a>
-            <a class="nav-item nav-link" data-toggle="tab" href="#locations" role="tab" aria-controls="nav-contact" aria-selected="false">Contact</a>
+            <a class="nav-item nav-link active" data-toggle="tab" href="#slots" role="tab" aria-controls="nav-home" aria-selected="true">Slots</a>
+            <a class="nav-item nav-link" data-toggle="tab" href="#details" role="tab" aria-controls="nav-profile" aria-selected="false">Details</a>
+            <a class="nav-item nav-link" data-toggle="tab" href="#locations" role="tab" aria-controls="nav-contact" aria-selected="false">Locations</a>
         </div>
     </nav>
 
