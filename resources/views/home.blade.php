@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <div class="py-5"></div>
+    <div class="py-3"></div>
 
     <slot-modal></slot-modal>
 
@@ -38,13 +38,14 @@
                     <div class="card card-body">
                         <h3 class="card-title">Test Dates</h3>
                         <hr>
-                        @foreach ($locations as $name => $slots)
-                    @php
-                        $locationUserSlots = $availableUserSlots->where('location', $name);
-                        $remainingLocationSlots = $slots->whereNotIn('datetime', $locationUserSlots->pluck('datetime'));
-                    @endphp
+                    @foreach ($locations as $name => $slots)
+                        @php
+                            $locationUserSlots = $availableUserSlots->where('location', $name);
+                            $remainingLocationSlots = $slots->whereNotIn('datetime', $locationUserSlots->pluck('datetime'));
+                            $locationSlots = $availableUserSlots->where('location', $name);
+                        @endphp
 
-                    <div>
+                        <div>
                         <h5>{{ $name }}</h5>
                         
                         <hr style="margin-top: 0;">
@@ -65,12 +66,12 @@
                             '>
                                 <img style="cursor:pointer;" src="{{ url('icons/question.svg') }}">
                             </a></h5>
-                        @forelse ($availableUserSlots->where('location', $name) as $availableUserSlot)
+                        @forelse ($locationSlots as $availableUserSlot)
 
                             @php
                                 $numberFormatter = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
                                 $place = $numberFormatter->format($availableUserSlot->currentUserPlace()); 
-                                $promotable = $availableUserSlot->promotable();  
+                                $promotable = $availableUserSlot->promotable(); 
                             @endphp
 
                             @if($promotable)
