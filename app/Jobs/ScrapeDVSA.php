@@ -18,6 +18,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use App\Location;
 use App\Modules\SlotManager;
+use Carbon\Carbon;
+use Illuminate\Support\Arr;
 
 class ScrapeDVSA implements ShouldQueue
 {
@@ -51,6 +53,8 @@ class ScrapeDVSA implements ShouldQueue
 
                 $this->proxy = $proxy;
                 $this->window = $window;
+
+                
 
                 $this->getToCalendar();
 
