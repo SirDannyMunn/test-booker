@@ -25,7 +25,7 @@ class DummyData
 
     public function getDummySlots($location)
     {
-        $dataPath = base_path("tests/data/{$location}");
+        $dataPath = base_path("database/data/{$location}");
         $dummySlots = collect();
 
         if (!file_exists($dataPath)) {

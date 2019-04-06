@@ -57,6 +57,7 @@ class Kernel extends ConsoleKernel
             // Get 1 user account for every 2 locations
             // Shup event using random user
 
+            
             foreach ($best_users as $user) {
                 dispatch(new ScrapeDVSA($user))->onQueue('medium');
             }

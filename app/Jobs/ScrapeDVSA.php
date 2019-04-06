@@ -54,8 +54,6 @@ class ScrapeDVSA implements ShouldQueue
                 $this->proxy = $proxy;
                 $this->window = $window;
 
-                
-
                 $this->getToCalendar();
 
                 $this->slots = $this->scrapeLocations($this->user->locations)->map(function ($item) {
