@@ -47,26 +47,34 @@ class ConfirmBooking implements ShouldQueue
 
             $this->user->update(['offer_open' => false]);
 
-            (new Browser)->browse(function ($window, $proxy) {
-
-                $window->click("#confirm-changes");
-
-                // Update slot taken = true
-
-                $window->checkPresent('// Validation');
-
-                $proxy->update(['last_used' => now()]);
-
-                $window->quit();
-                
-            }, true, false, $this->user->browser_session_id);
+            if(env('CRAWLER_ON')) {
+                $this->confirmBooking();
+            }
             
             // Send email
+            
 
         }, function () {
 
             \Log::info('Releasing job');
             return $this->release(30);
         });
+    }
+
+    public function confirmBooking()
+    {
+        (new Browser)->browse(function ($window, $proxy) {
+
+            $window->click("#confirm-changes");
+
+            // Update slot taken = true
+
+            $window->checkPresent('// Validation');
+
+            $proxy->update(['last_used' => now()]);
+
+            $window->quit();
+            
+        }, true, false, $this->user->browser_session_id);
     }
 }

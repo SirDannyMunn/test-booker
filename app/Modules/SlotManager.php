@@ -8,13 +8,23 @@ use Carbon\Carbon;
 
 class SlotManager
 {
+    public function mapLocationSlots($locationSlots)
+    {
+        return $locationSlots->map(function ($item) {
+                    
+            $slots = $this->getQualifiedSlots($item['slots'], $item['location']);
+
+            if (filled($slots)) return $slots;
+        });
+    }
+
     /**
      * Matches users to appropriate slots based on certain factors
      * @param $slots
      * @param $location
      * @return array|\Illuminate\Support\Collection
      */
-    public function getMatches($slots, $location)
+    public function getQualifiedSlots($slots, $location)
     {
         $users = $location->users->sortByDesc('priority');
 

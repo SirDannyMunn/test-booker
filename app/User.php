@@ -78,6 +78,15 @@ class User extends Authenticatable
         return $eligibleUsers = User::whereIn('id', $alternativeUserSlots->pluck('user_id'))->get();
     }
 
+    public function reservationMade($browserId)
+    {
+        $this->user->notify(new ReservationMade($this->user, $this->slot));
+        $this->user->update([
+            "offer_open"=>true,
+            "browser_session_id" => $browserId
+        ]);
+    }
+
     /**
      * Returns user records based on most area coverage
      * @param $users Collection

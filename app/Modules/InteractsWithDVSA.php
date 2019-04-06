@@ -57,7 +57,7 @@ trait InteractsWithDVSA
         }
     }
 
-    public function makeReservation($slot)
+    public function reserveSlot($slot)
     {
 //        $this->window->mouseover("[data-date='{$date->format('Y-m-d')}']")->clickAndHold()->pause(rand(59, 212))->releaseMouse()
 //        $this->window->mouseover("[data-datetime-label='{$date->format('l j F Y g:ia')}']")->clickAndHold()->pause(rand(59, 212))->releaseMouse()

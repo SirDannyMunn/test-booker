@@ -80,7 +80,7 @@ abstract class Page extends BasePage
             $this->checkPage("Changed calendar location");
             $slots = $this->getSlots($location->name);
             $location->update(['last_checked' => now()->timestamp]);
-            $this->toNotify->push($slotManager->getMatches($slots, $location));
+            $this->toNotify->push($slotManager->getQualifiedSlots($slots, $location));
         }
     }
 

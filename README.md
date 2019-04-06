@@ -1,5 +1,27 @@
 # Project info
 
+## Overview
+
+The business logic is broken into groups
+
+* Crawling logic
+* Data processing logic
+* Customer/slot management logic
+* Queue logic
+
+## Main design object
+
+Allow each of the above to be operated independantly 
+
+Substitute crawling logic for testing of application
+
+Start from data processing
+
+
+
+
+
+
 - [Project Ideas](#project)
 - [Installation](#installation)
 

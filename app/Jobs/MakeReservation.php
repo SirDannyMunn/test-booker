@@ -14,11 +14,12 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use App\Modules\ManagesUserSlots;
 
 class MakeReservation implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels,
-        InteractsWithDVSA;
+        InteractsWithDVSA, ManagesUserSlots;
 
     public $tries = 3;
     public $timeout = 240;
@@ -51,41 +52,32 @@ class MakeReservation implements ShouldQueue
         Redis::connection('default')->funnel('DVSA')->limit(env("PROXY_LIMIT"))->then(function () {
         Redis::connection('default')->funnel($this->user->dl_number)->limit(1)->then(function() {
 
-            (new Browser)->browse(/**
-             * @param $window
-             * @param $proxy
-             */
-                function ($window, $proxy) {
+            if (env('CRAWLER_ON')) {
+                $this->makeReservation();
+            }
 
-                $this->proxy = $proxy;
-                $this->window = $window;
-
-                $this->getToCalendar();
-
-                $this->makeReservation($this->slot);
-
-                $this->user->notify(new ReservationMade($this->user, $this->slot));
-                $this->user->update(['offer_open'=>true]);
-                $this->userSlot->update(['tries'=>$this->userSlot->tries+1]);
-
-                dispatch(new CheckUserSlot(
-                    $this->userSlot, $this->user)
-                )->onQueue('high')->delay(now()->addMinutes(15));
-
-                $this->user->update(["browser_session_id" => $window->driver->getSessionID()]);
-
-            }, true);
+            // Customer/slot management logic
+            $this->reservationMade();
 
             $this->proxy->update(['completed' => $this->proxy->completed + 1, 'fails' => 0]);
 
         }, function () {
-            \Log::info('Releasing job');
-            return $this->release(rand(40,60));
+            // return $this->release(rand(40,60));
         });
         }, function () {
-            \Log::info('Releasing job');
-            return $this->release(rand(40,60));
+            // return $this->release(rand(40,60));
         });
+    }
+
+    public function makeRservation()
+    {
+        // Browser automation logic
+        (new Browser)->browse(function ($window, $proxy) {
+            $this->proxy = $proxy;
+            $this->window = $window;
+            $this->getToCalendar();
+            $this->reserveSlot($this->slot);
+        }, true);
     }
 
     /**

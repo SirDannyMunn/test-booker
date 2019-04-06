@@ -20,6 +20,7 @@ use App\Location;
 use App\Modules\SlotManager;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use Tests\DummyData;
 
 class ScrapeDVSA implements ShouldQueue
 {
@@ -45,46 +46,38 @@ class ScrapeDVSA implements ShouldQueue
         Redis::connection('default')->funnel('DVSA')->limit(env("PROXY_LIMIT"))->then(function () {
         Redis::connection('default')->funnel($this->user->dl_number)->limit(1)->then(function() {
 
-            (new Browser)->browse(/**
-             * @param $window
-             * @param $proxy
-             */
-                function ($window, $proxy) {
-
-                $this->proxy = $proxy;
-                $this->window = $window;
-
-                $this->getToCalendar();
-
-                $this->slots = $this->scrapeLocations($this->user->locations)->map(function ($item) {
-                    $slots = $this->slotManager->getMatches($item['slots'], $item['location']);
-
-                    if (filled($slots)) {
-                        return $slots;
-                    }
-                });
-            });
+            if (env('CRAWLER_ON')) {
+                $this->scrapeWebsite();
+            }
+            
+            $this->slots = $this->slotManager->mapLocationSlots(
+                env('CRAWLER_ON') ? $this->slots : (new DummyData)->getDummySlots('Skipton')
+            );
 
             Log::notice('Updating proxy completions');
 
             $this->window->quit();
             $this->proxy->update(['completed' => $this->proxy->completed + 1, 'fails' => 0]);
 
-
+            if ($this->slots) {
+                $this->makeReservationEvents();
+            }
         }, function () {
-
-            \Log::info('Releasing user');
 //            return $this->release(30);
         });
         }, function () {
-
-            \Log::info('Releasing job');
 //            return $this->release(30);
         });
+    }
 
-        if ($this->slots) {
-            $this->makeReservationEvents();
-        }
+    public function scrapeWebsite()
+    {
+        (new Browser)->browse(function ($window, $proxy) {
+            $this->proxy = $proxy;
+            $this->window = $window;
+            $this->getToCalendar();
+            $this->slots = $this->scrapeLocations($this->user->locations);               
+        });
     }
 
     public function makeReservationEvents()
@@ -105,11 +98,6 @@ class ScrapeDVSA implements ShouldQueue
                 $best->user->id,
                 $best
             ))->onQueue('medium');
-
-//            dispatch_now(new MakeReservation(
-//                $eligibleUsers->find($best['user']['id']),
-//                $best['userSlot']
-//            ));
         }
     }
 

@@ -25,21 +25,28 @@ class FindCleanProxies implements ShouldQueue
      */
     public function handle()
     {
+        if(env('CRAWLER_ON')) {
+            $this->findCleanProxies();
+        }
+    }
+
+    public function findCleanProxies()
+    {
         (new Browser)->browse(/**
-         * @param $window
-         * @param $proxy
-         */
-        function ($window, $proxy) {
-
-            $this->proxy = $proxy;
-            $this->window = $window;
-
-            $url = 'https://www.gov.uk/change-driving-test';
-            $this->window->visit($url);
-            $this->checkPage("Accessing site");
-            $this->window->click('#get-started > a');
-            $this->checkPage("Logging in");
-        }, false, true);
+            * @param $window
+            * @param $proxy
+            */
+           function ($window, $proxy) {
+   
+               $this->proxy = $proxy;
+               $this->window = $window;
+   
+               $url = 'https://www.gov.uk/change-driving-test';
+               $this->window->visit($url);
+               $this->checkPage("Accessing site");
+               $this->window->click('#get-started > a');
+               $this->checkPage("Logging in");
+            }, false, true);
     }
 
     public function failed()

@@ -19,8 +19,6 @@ class DummyData
 
             return today()->addDays(rand(0, 60))->startOfWeek()->addDays(rand(0, 4))->setTime($time[0], $time[1]);
         });
-        
-        
     }
 
     public function getDummySlots($location)

@@ -19,6 +19,11 @@ class UserSlot extends Model
         return $this->hasOne('App\Slot', 'id', 'slot_id');
     }
 
+    public function tried()
+    {
+        $this->update(['tries'=>$this->userSlot->tries+1]);
+    }
+
     public function promote()
     {
         $newScore = $this->points + 100;
