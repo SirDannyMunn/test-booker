@@ -1,4 +1,3 @@
-use Illuminate\Support\Arr;
     <?php
 
     use App\Notifications\ReservationMade;
