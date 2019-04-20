@@ -19,7 +19,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use App\Location;
 use App\Modules\SlotManager;
 use Carbon\Carbon;
-use Illuminate\Support\Arr;
 use Tests\DummyData;
 
 class ScrapeDVSA implements ShouldQueue

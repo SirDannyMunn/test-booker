@@ -46,7 +46,7 @@ class DummyData
 
     public function storeSlots($slots, $path)
     {
-        $file = fopen($path, 'w');
+        $file = fopen("{$path}.json", 'w');
         fwrite($file, json_encode($slots));
         fclose($file);
 

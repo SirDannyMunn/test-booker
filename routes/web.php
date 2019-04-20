@@ -1,12 +1,12 @@
-    <?php
+<?php
 
-    use App\Notifications\ReservationMade;
-    use App\Browser\Browser;
-    use App\Jobs\ScrapeDVSA;
-    use App\User;
-    use App\Slot;
-    use Illuminate\Support\Arr;
-    use Tests\DummyData;
+    // use App\Notifications\ReservationMade;
+    // use App\Browser\Browser;
+    // use App\Jobs\ScrapeDVSA;
+    // use App\User;
+    // use App\Slot;
+    // use Illuminate\Support\Arr;
+    // // use Tests\DummyData;
 
     Route::get('/', function () {
         return view('welcome');
