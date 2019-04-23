@@ -55,9 +55,6 @@ class ScrapeDVSA implements ShouldQueue
 
             Log::notice('Updating proxy completions');
 
-            $this->window->quit();
-            $this->proxy->update(['completed' => $this->proxy->completed + 1, 'fails' => 0]);
-
             if ($this->slots) {
                 $this->makeReservationEvents();
             }
@@ -77,26 +74,24 @@ class ScrapeDVSA implements ShouldQueue
             $this->getToCalendar();
             $this->slots = $this->scrapeLocations($this->user->locations);               
         });
+        $this->window->quit();
+        $this->proxy->update(['completed' => $this->proxy->completed + 1, 'fails' => 0]);
     }
 
     public function makeReservationEvents()
     {
-        foreach ($this->slots as $slot) { /* @var $item Illuminate\Support\Collection */
-
-            Log::notice('Notifying Users');
+        foreach ($this->slots->collapse() as $slot) { // TODO - This collapse will likely need removing
 
             $best = $slot->getBestUser();
 
             if (is_null($best)) {
-                return;
+                return; // TODO - wtf - Should this not continue?
             }
 
-            Log::notice($best);
-
             dispatch(new MakeReservation(
-                $best->user->id,
+                $best->user,
                 $best
-            ))->onQueue('medium');
+            ))->onQueue('high');
         }
     }
 

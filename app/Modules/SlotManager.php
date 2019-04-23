@@ -8,6 +8,10 @@ use Carbon\Carbon;
 
 class SlotManager
 {
+    /**
+     * @param $locationSlots
+     * @return Illuminate\Support\Collection
+     */
     public function mapLocationSlots($locationSlots)
     {
         return $locationSlots->map(function ($item) {
@@ -78,6 +82,12 @@ class SlotManager
         return $slots;
     }
 
+    /**
+     * @param $slots [[string, ...]]
+     * @param $users [User::class]
+     * @param $location [Location::class]
+     * @return array of ranked user against respective slots
+     */
     private function rankUsers($slots, $users, $location)
     {
         $user_points = [];
@@ -92,6 +102,7 @@ class SlotManager
                     $user_points[$slot][$id] += 2;
                 if ($user->location == $location->name)
                     $user_points[$slot][$id] += 3; continue;
+                /** @noinspection PhpUnreachableStatementInspection */
                 if ($user->locations->pluck('name')->contains('Skipton'))
                     $user_points[$slot][$id] += 1;
             }
@@ -100,6 +111,11 @@ class SlotManager
         return $user_points;
     }
 
+    /**
+     * @param $eligible_candidates
+     * @param $location
+     * @return mixed
+     */
     private function mapUserSlots($eligible_candidates, $location)
     {
         return collect($eligible_candidates)->map(function ($userPoints, $datetime) use ($eligible_candidates, $location) {

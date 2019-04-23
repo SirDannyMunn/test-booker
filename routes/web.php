@@ -6,7 +6,7 @@
     // use App\User;
     // use App\Slot;
     // use Illuminate\Support\Arr;
-    // // use Tests\DummyData;
+    use Tests\DummyData;
 
     Route::get('/', function () {
         return view('welcome');
@@ -16,7 +16,7 @@
 
         // return $slots = Slot::promotable()->get();
         if (env('APP_DEBUG')) {
-            return (new DummyData)->getDummySlots('Skipton');
+            return dispatch_now(new \App\Jobs\ScrapeDVSA(\App\User::find(1)));
         }
 
         // return $slots = auth()->user()->notify(new ReservationMade(auth()->user(), Slot::find(1)));

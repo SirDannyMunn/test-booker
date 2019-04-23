@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use App\Location;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
@@ -13,35 +14,45 @@ class DummyData
 
     public function makeNewDummySlots($amount, $dataPath)
     {
-        $slots = collect(array_fill(0, $amount, null))->map(function($item) {
+        return $slots = collect(array_fill(0, $amount, null))->map(function($item) {
 
             $time = explode(':', Arr::random($this->times));
 
-            return today()->addDays(rand(0, 60))->startOfWeek()->addDays(rand(0, 4))->setTime($time[0], $time[1]);
+            return today()->addDays(rand(0, 60))
+                          ->startOfWeek()
+                          ->addDays(rand(0, 4))
+                          ->setTime($time[0], $time[1]);
         });
     }
 
+    /**
+     * @param $location
+     * @return mixed
+     */
     public function getDummySlots($location)
     {
         $dataPath = base_path("database/data/{$location}");
         $dummySlots = collect();
 
         if (!file_exists($dataPath)) {
-            $newSlots = $this->makeNewDummySlots(rand($this->defaultAmount, $this->defaultAmount + 5), $dataPath);
-            $dummySlots->concat($newSlots);
+            $dummySlots = $dummySlots->merge($this->makeNewDummySlots(rand($this->defaultAmount, $this->defaultAmount + 5), $dataPath));
         }
 
-        $dummySlots->concat(json_decode(file_get_contents($dataPath), true));
+        $dummySlots = $dummySlots->merge(json_decode(file_get_contents($dataPath), true));
         
         $testsLaterThanToday = count($dummySlots->filter(function($item) {
-            return Carbon::parse($item)->greaterThan(today()->format('d/m/y H:m:s'));
+            return Carbon::parse($item['date'])->greaterThan(today()->format('d/m/y H:m:s'));
         }));
 
         if ($testsLaterThanToday < $this->defaultAmount) {
-            $dummySlots->concat($this->makeNewDummySlots($this->defaultAmount - $testsLaterThanToday + rand(1,3), $dataPath));
+            $dummySlots = $dummySlots->merge($this->makeNewDummySlots($this->defaultAmount - $testsLaterThanToday + rand(1,3), $dataPath));
         }
 
-        return $dummySlots;
+        $locationsSlots = collect([['slots' => [$dummySlots->pluck('date')], 'location' => Location::firstOrCreate(['name' => $location])]]);
+
+        $this->storeSlots($locationsSlots, $dataPath);
+
+        return $locationsSlots;
     }
 
     public function storeSlots($slots, $path)

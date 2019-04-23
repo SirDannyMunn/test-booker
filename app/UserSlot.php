@@ -3,7 +3,6 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class UserSlot extends Model
 {
@@ -21,7 +20,7 @@ class UserSlot extends Model
 
     public function tried()
     {
-        $this->update(['tries'=>$this->userSlot->tries+1]);
+        $this->update(['tries'=>$this->tries+1]);
     }
 
     public function promote()

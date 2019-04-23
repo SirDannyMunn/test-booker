@@ -59,8 +59,6 @@ class MakeReservation implements ShouldQueue
             // Customer/slot management logic
             $this->reservationMade();
 
-            $this->proxy->update(['completed' => $this->proxy->completed + 1, 'fails' => 0]);
-
         }, function () {
             // return $this->release(rand(40,60));
         });
@@ -69,7 +67,7 @@ class MakeReservation implements ShouldQueue
         });
     }
 
-    public function makeRservation()
+    public function makeReservation()
     {
         // Browser automation logic
         (new Browser)->browse(function ($window, $proxy) {
@@ -78,6 +76,8 @@ class MakeReservation implements ShouldQueue
             $this->getToCalendar();
             $this->reserveSlot($this->slot);
         }, true);
+
+        $this->proxy->update(['completed' => $this->proxy->completed + 1, 'fails' => 0]);
     }
 
     /**

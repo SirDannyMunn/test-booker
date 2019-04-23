@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Notifications\ReservationMade;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Notifications\Notifiable;
@@ -80,8 +81,8 @@ class User extends Authenticatable
 
     public function reservationMade($browserId)
     {
-        $this->user->notify(new ReservationMade($this->user, $this->slot));
-        $this->user->update([
+        $this->notify(new ReservationMade($this->user, $this->slot));
+        $this->update([
             "offer_open"=>true,
             "browser_session_id" => $browserId
         ]);
