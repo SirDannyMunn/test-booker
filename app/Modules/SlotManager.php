@@ -32,13 +32,9 @@ class SlotManager
     {
         $users = $location->users->sortByDesc('priority');
 
-        $slots = $this->removeSlotsAfter(
-            $slots,
-            Carbon::parse($users->pluck('test_date')->sort()->last())
-        );
-//        $slots[0]->filter(function ($slot) use ($users) {
-//            return Carbon::parse($users->pluck('test_date')->sort()->last())->lessThan($slot);
-//        });
+        $slots[0]->filter(function ($slot) use ($users) {
+            return Carbon::parse($users->pluck('test_date')->sort()->last())->lessThan($slot);
+        });
 
         $user_points = $this->rankUserSlots($slots, $users, $location);
 
@@ -47,42 +43,13 @@ class SlotManager
             abort(500, 'No valid slots found');
         }
 
-        $eligible_candidates = $this->sliceEligibleCandidates($user_points);
+        $eligible_candidates = array_filter($user_points, function ($user_point) {
+            return $user_point==0;
+        });
 
         $matched_slots = $this->mapUserSlots($eligible_candidates, $location);
 
         return $matched_slots;
-    }
-
-    /**
-     * @param $user_points
-     * @return \Illuminate\Support\Collection
-     */
-    private function sliceEligibleCandidates($user_points)
-    {
-        $eligible_candidates = array_where(array_first($user_points), function ($value) {
-            return $value != 0;
-        });
-
-        return collect(array_slice($user_points, 0, count($eligible_candidates)));
-    }
-
-    /**
-     * Slices array when slot dates pass latest user's slot date (i.e. become useless)
-     * @param $slots
-     * @param $latest_test_date Carbon
-     * @return array
-     */
-    private function removeSlotsAfter($slots, $latest_test_date)
-    {
-        // Loop though slots until get to the point then break and slice array with index
-        foreach ($slots as $index => $slot) {
-            if ($latest_test_date->lessThanOrEqualTo($slot)) {
-                return array_slice($slots, 0, $index);
-            }
-        }
-
-        return $slots;
     }
 
     /**
