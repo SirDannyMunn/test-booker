@@ -15,7 +15,7 @@ class SlotManager
     public function mapLocationSlots($locationSlots)
     {
         return $locationSlots->map(function ($item) {
-                    
+
             $slots = $this->getQualifiedSlots($item['slots'], $item['location']);
 
             if (filled($slots)) return $slots;
@@ -39,8 +39,7 @@ class SlotManager
         $user_points = $this->rankUserSlots($slots, $users, $location);
 
         if (!$user_points) {
-            $this->window->quit();
-            abort(500, 'No valid slots found');
+            $this->window->quit(); abort(500, 'No valid slots found');
         }
 
         $eligible_candidates = array_filter($user_points, function ($user_point) {

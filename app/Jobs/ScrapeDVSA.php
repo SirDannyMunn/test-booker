@@ -36,7 +36,7 @@ class ScrapeDVSA implements ShouldQueue
     public function __construct(User $user)
     {
         $this->user = $user;
-        $this->slots = collect();
+        $this->slots = collect(env('CRAWLER_ON') ? $this->slots : (new DummyData('Skipton'))->getDummySlots());
         $this->slotManager = new SlotManager;
     }
 
@@ -48,11 +48,13 @@ class ScrapeDVSA implements ShouldQueue
             if (env('CRAWLER_ON')) {
                 $this->scrapeWebsite();
             }
-            
-            $this->slots = $this->slotManager->mapLocationSlots(
-                env('CRAWLER_ON') ? $this->slots : (new DummyData('Skipton'))->getDummySlots()
-            );
 
+            $this->slots->map(function ($item) {
+                $slots = $this->slotManager->getQualifiedSlots($item['slots'], $item['location']);
+
+                if (filled($slots)) return $slots;
+            });
+    
             if ($this->slots) {
                 $this->makeReservationEvents();
             }
