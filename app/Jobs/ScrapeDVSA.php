@@ -50,10 +50,8 @@ class ScrapeDVSA implements ShouldQueue
             }
             
             $this->slots = $this->slotManager->mapLocationSlots(
-                env('CRAWLER_ON') ? $this->slots : (new DummyData)->getDummySlots('Skipton')
+                env('CRAWLER_ON') ? $this->slots : (new DummyData('Skipton'))->getDummySlots()
             );
-
-            Log::notice('Updating proxy completions');
 
             if ($this->slots) {
                 $this->makeReservationEvents();
@@ -80,8 +78,12 @@ class ScrapeDVSA implements ShouldQueue
 
     public function makeReservationEvents()
     {
+        shell_exec('echo "Slots found" 1>&2');
+
+        shell_exec("echo '{$this->slots}' 1>&2");
         foreach ($this->slots->collapse() as $slot) { // TODO - This collapse will likely need removing
 
+            shell_exec("echo 'Reserving {$slot->datetime}' 1>&2");
             $best = $slot->getBestUser();
 
             if (is_null($best)) {

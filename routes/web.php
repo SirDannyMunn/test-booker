@@ -15,21 +15,20 @@
     Route::get('/test', function () {
 
         // return $slots = Slot::promotable()->get();
+
+//        return action('LogController', 'index');
+
         if (env('APP_DEBUG')) {
             return dispatch_now(new \App\Jobs\ScrapeDVSA(\App\User::find(1)));
         }
-
-        // return $slots = auth()->user()->notify(new ReservationMade(auth()->user(), Slot::find(1)));
-
-        // $slots->random()->promotable();
-
-        // return auth()->user()->defaultCard();
 
         return view('payment');
 
         return 'success';
     });
     
+    Route::get('/log', 'LogController@index');
+
     Route::get('/home', 'HomeController@index')->name('home');
 
     Route::get('/payment', 'PaymentsController@index');

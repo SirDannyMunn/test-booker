@@ -36,8 +36,11 @@ class SlotManager
             $slots,
             Carbon::parse($users->pluck('test_date')->sort()->last())
         );
+//        $slots[0]->filter(function ($slot) use ($users) {
+//            return Carbon::parse($users->pluck('test_date')->sort()->last())->lessThan($slot);
+//        });
 
-        $user_points = $this->rankUsers($slots, $users, $location);
+        $user_points = $this->rankUserSlots($slots, $users, $location);
 
         if (!$user_points) {
             $this->window->quit();
@@ -88,7 +91,7 @@ class SlotManager
      * @param $location [Location::class]
      * @return array of ranked user against respective slots
      */
-    private function rankUsers($slots, $users, $location)
+    private function rankUserSlots($slots, $users, $location)
     {
         $user_points = [];
         foreach ($slots[0] as $slot) {
@@ -118,30 +121,21 @@ class SlotManager
      */
     private function mapUserSlots($eligible_candidates, $location)
     {
-        return collect($eligible_candidates)->map(function ($userPoints, $datetime) use ($eligible_candidates, $location) {
+        return collect($eligible_candidates)->map(function ($userSlots, $datetime) use ($eligible_candidates, $location) {
 
             // Sort IDs from eligible candidates with most points at top then map to new array.
-            $user_points = collect($userPoints)->sort()->reverse()->map(function ($value, $key) {
+            $user_points = collect($userSlots)->sort()->reverse()->map(function ($value, $key) {
                 return ['id' => $key, 'points' => $value];
             })->values();
 
             if (!filled($user_points)) return [];
 
-            // Select user by index of current date within sorted $user_points array.
-            $user = $user_points[$eligible_candidates->keys()->search($datetime)];
-
             $slot = Slot::updateOrCreate(['location'=>$location->name,'datetime'=>$datetime]);
 
-            // Make UserSlots (maybe abstract to userSlot model ? )
-            foreach ($userPoints as $user_id => $point) {
-                if ($point==0) continue;
+            (new UserSlot)->storeMany($userSlots);
 
-                $userSlot = UserSlot::updateOrCreate(['user_id'=>$user_id,'slot_id'=>$slot->id,'points'=>$point]);
-
-                if ( ! $userSlot->exists()) {
-                    $slot->userSlots()->save($userSlot);
-                }
-            }
+            // Select user by index of current date within sorted $user_points array.
+            $user = $user_points[$eligible_candidates->keys()->search($datetime)];
 
             if ($user['points']) {
                 return $slot;

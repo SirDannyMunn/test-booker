@@ -31,4 +31,17 @@ class UserSlot extends Model
             'points' => $newScore, 'tries' => 0
         ]);
     }
+
+    public function storeMany($userSlots)
+    {
+        foreach ($userSlots as $user_id => $point) {
+            if ($point==0) continue;
+
+            $userSlot = UserSlot::updateOrCreate(['user_id'=>$user_id,'slot_id'=>$slot->id,'points'=>$point]);
+
+            if ( ! $userSlot->exists()) {
+                $slot->userSlots()->save($userSlot);
+            }
+        }
+    }
 }
