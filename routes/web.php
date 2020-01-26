@@ -19,7 +19,7 @@
 //        return action('LogController', 'index');
 
         if (env('APP_DEBUG')) {
-            return dispatch_now(new \App\Jobs\ScrapeDVSA(\App\User::find(1)));
+            return dispatch_now(new \App\Jobs\GetNewUserSlots(\App\User::find(1)));
         }
 
         return view('payment');

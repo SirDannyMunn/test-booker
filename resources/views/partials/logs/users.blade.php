@@ -14,10 +14,21 @@
                 <td>{{$user->name}}</td>
                 <td>{{$user->tier}}</td>
                 <td>
-                <span class="font-weight-bolder">{{$user->location}}</span>
-                @foreach($user->locations as $location)
-                    <span>{{$location->name}}</span>
-                @endforeach
+                <div>
+                    <table>
+                        <tr>
+                            <th class="font-weight-bolder">{{$user->location}}</th>
+                            @foreach($user->locations as $location)
+{{--                                <th @if($user->location==$location->name)class="font-weight-bolder"@endif>{{$location->name}}</th>--}}
+                                <th>{{$location->name}}</th>
+
+                                @foreach($location->slots as $slot)
+                                    {{$slot->datetime}}
+                                @endforeach
+                            @endforeach
+                        </tr>
+                    </table>
+                </div>
                 </td>
             </tr>
         @endforeach

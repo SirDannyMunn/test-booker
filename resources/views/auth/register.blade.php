@@ -61,6 +61,60 @@
                             </div>
                         </div>
 
+
+
+                        {{--ADDITIONS--}}
+
+
+
+                        <div class="form-group row">
+                            <label for="preferred_date" class="col-md-4 col-form-label text-md-right">{{ __('Preferred Date') }}</label>
+
+                            <div class="col-md-6">
+                                <input id="preferred_date" class="form-control" name="preferred_date" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="test_date" class="col-md-4 col-form-label text-md-right">{{ __('Test Date') }}</label>
+
+                            <div class="col-md-6">
+                                <input id="test_date" class="form-control" name="test_date" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="ref_number" class="col-md-4 col-form-label text-md-right">{{ __('Reference Number') }}</label>
+
+                            <div class="col-md-6">
+                                <input id="ref_number" class="form-control" name="ref_number" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="location" class="col-md-4 col-form-label text-md-right">{{ __('Location') }}</label>
+
+                            <div class="col-md-6">
+                                <input id="location" class="form-control" name="location" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="dl_number" class="col-md-4 col-form-label text-md-right">{{ __('Driving Licence Number') }}</label>
+
+                            <div class="col-md-6">
+                                <input id="dl_number" class="form-control" name="dl_number" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="phone_number" class="col-md-4 col-form-label text-md-right">{{ __('Phone Number') }}</label>
+
+                            <div class="col-md-6">
+                                <input id="phone_number" class="form-control" name="phone_number" required>
+                            </div>
+                        </div>
+
                         <div class="form-group row mb-0">
                             <div class="col-md-6 offset-md-4">
                                 <button type="submit" class="btn btn-primary">

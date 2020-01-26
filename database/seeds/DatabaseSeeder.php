@@ -23,7 +23,9 @@ class DatabaseSeeder extends Seeder
             $user_locations = $locations->whereIn('name', isset($this->users[$i]['locations']) ? $this->users[$i]['locations'] : $locations->random(rand(1,3))->pluck('name'));
 
             $user = factory(App\User::class, $i==0 ? 'admin' : null)->create(
-                ['location' => $this->users[$i]['preferred_location'], 'tier'=>$this->users[$i]['tier']]
+                ['location' => $this->users[$i]['preferred_location'],
+                 'tier'=>$this->users[$i]['tier'],
+                 'test_date'=>now()->addDays(rand(30,45))->startOfWeek()->addDays(rand(0,4))]
             );
 
             foreach ($user_locations as $user_location) {
@@ -38,7 +40,7 @@ class DatabaseSeeder extends Seeder
     private $users = [
     [
         'preferred_location' => 'Skipton',
-        'tier' => 'premium'
+        'tier' => 'premium',
     ],[
         'preferred_location' => 'Skipton',
         'tier' => 'paid'

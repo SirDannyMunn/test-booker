@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpInconsistentReturnPointsInspection */
 
 namespace App\Jobs;
 
@@ -10,6 +10,7 @@ use App\Browser\Browser;
 //use App\Jobs\MakeReservation;
 use Illuminate\Bus\Queueable;
 use App\Modules\InteractsWithDVSA;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Queue\SerializesModels;
@@ -21,7 +22,7 @@ use App\Modules\SlotManager;
 use Carbon\Carbon;
 use Tests\DummyData;
 
-class ScrapeDVSA implements ShouldQueue
+class GetNewUserSlots implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels,
         InteractsWithDVSA;
@@ -36,7 +37,6 @@ class ScrapeDVSA implements ShouldQueue
     public function __construct(User $user)
     {
         $this->user = $user;
-        $this->slots = collect(env('CRAWLER_ON') ? $this->slots : (new DummyData('Skipton'))->getDummySlots());
         $this->slotManager = new SlotManager;
     }
 
@@ -45,18 +45,19 @@ class ScrapeDVSA implements ShouldQueue
         Redis::connection('default')->funnel('DVSA')->limit(env("PROXY_LIMIT"))->then(function () {
         Redis::connection('default')->funnel($this->user->dl_number)->limit(1)->then(function() {
 
-            if (env('CRAWLER_ON')) {
-                $this->scrapeWebsite();
-            }
+            $this->slots = collect(env('CRAWLER_ON')
+                ? $this->scrapeWebsite()
+                : (new DummyData)->getDummySlots()
+            );
 
-            $this->slots->map(function ($item) {
-                $slots = $this->slotManager->getQualifiedSlots($item['slots'], $item['location']);
+            $this->slots = $this->slots->map(function ($item) {
+                $slots = $this->slotManager->manageSlots($item['slots'], $item['location']);
 
                 if (filled($slots)) return $slots;
             });
-    
-            if ($this->slots) {
-                $this->makeReservationEvents();
+
+            if (filled($this->slots)) {
+                $this->makeReservationEvents($this->slots);
             }
         }, function () {
 //            return $this->release(30);
@@ -78,23 +79,23 @@ class ScrapeDVSA implements ShouldQueue
         $this->proxy->update(['completed' => $this->proxy->completed + 1, 'fails' => 0]);
     }
 
-    public function makeReservationEvents()
+    /**
+     * @param $slots Collection
+     */
+    public function makeReservationEvents($slots)
     {
         shell_exec('echo "Slots found" 1>&2');
 
-        shell_exec("echo '{$this->slots}' 1>&2");
-        foreach ($this->slots->collapse() as $slot) { // TODO - This collapse will likely need removing
+        foreach ($slots->collapse() as $slot) { // TODO - This collapse will likely need removing
 
-            shell_exec("echo 'Reserving {$slot->datetime}' 1>&2");
-            $best = $slot->getBestUser();
+            $bestUserSlot = $slot->getBestUserSlot();
 
-            if (is_null($best)) {
+            if (is_null($bestUserSlot)) {
                 return; // TODO - wtf - Should this not continue?
             }
 
             dispatch(new MakeReservation(
-                $best->user,
-                $best
+                $bestUserSlot->user, $bestUserSlot
             ))->onQueue('high');
         }
     }

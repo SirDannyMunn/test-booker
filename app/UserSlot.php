@@ -32,7 +32,7 @@ class UserSlot extends Model
         ]);
     }
 
-    public function storeMany($userSlots)
+    public function store($userSlots, $slot)
     {
         foreach ($userSlots as $user_id => $point) {
             if ($point==0) continue;

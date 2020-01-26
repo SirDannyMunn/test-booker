@@ -25,7 +25,7 @@ class Slot extends Model
             ->lessThanOrEqualTo($this->datetime);
     }
 
-    public function getBestUser()
+    public function getBestUserSlot()
     {
         $alternativeUserSlots = $this->rankUserSlots()->load('user');        
         
@@ -33,7 +33,7 @@ class Slot extends Model
 
             // Check each user availability (whether they currently have an offer open)
             if( ! $userSlot->user->offer_open && $userSlot->tries < 1)
-                return $bestUser = $userSlot;
+                return $bestUserSlot = $userSlot;
         }
 
         return null;

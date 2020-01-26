@@ -3,7 +3,7 @@
 namespace App\Console;
 
 use App\Jobs\FindCleanProxies;
-use App\Jobs\ScrapeDVSA;
+use App\Jobs\GetNewUserSlots;
 use App\Proxy;
 use App\Slot;
 use App\User;
@@ -50,7 +50,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->call(function() use ($users) {
             $locations = $users->pluck('locations')->flatten()->pluck('name')->unique()->flip();
-            
+
             $best_users = (new User)->getBest($users, $locations);
             // TODO - alternative (location oriented) solution
             // Get all locations (where not been checked within 5-10 minutes?)
@@ -58,7 +58,8 @@ class Kernel extends ConsoleKernel
             // Shup event using random user
 
             foreach ($best_users as $user) {
-                dispatch(new ScrapeDVSA($user))->onQueue('medium');
+//                dispatch(new GetNewUserSlots($user))->onQueue('medium');
+                dispatch_now(new GetNewUserSlots($user));
             }
         })->cron("*/{$frequency} * * * *")
             ->name('DVSA');
@@ -67,11 +68,11 @@ class Kernel extends ConsoleKernel
 
         // TODO - Make another event which rapidly gets working proxies which can at least access site.
         $schedule->call(function() {
-            if (Proxy::all()->count() < 50 && env('CRAWLER_ON')) {
-                for ($i=0; $i < 6; $i++) {
-                    dispatch(new FindCleanProxies)->onQueue('low')->delay(now()->addSeconds($i*10));
-                }
-            }
+//            if (Proxy::all()->count() < 50 && env('CRAWLER_ON')) {
+//                for ($i=0; $i < 6; $i++) {
+//                    dispatch(new FindCleanProxies)->onQueue('low')->delay(now()->addSeconds($i*10));
+//                }
+//            }
         })->everyMinute();
 
         $schedule->call(function() {

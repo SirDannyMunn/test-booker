@@ -2,7 +2,7 @@
 
 namespace App\Browser;
 
-use App\Jobs\ScrapeDVSA;
+use App\Jobs\GetNewUserSlots;
 use App\Modules\InteractsWithDVSA;
 use App\Modules\ProxyManager;
 use App\Proxy;
@@ -61,6 +61,7 @@ class Browser extends BrowserInstance
                 $this->makeLog($e);
             if ($e instanceof WebDriverCurlException)
                 $this->proxy->failed();
+
             $this->closeBrowser();
 
             throw $e;

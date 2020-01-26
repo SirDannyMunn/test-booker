@@ -66,7 +66,13 @@ class RegisterController extends Controller
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => \Hash::make($data['password']),
+            'preferred_date' => \Carbon\Carbon::parse('next week')->toDateString(),
+            'test_date' => \Carbon\Carbon::parse('1st march')->toDateString(),
+            'ref_number' => $data['ref_number'],
+            'location' => $data['location'],
+            'dl_number' => encrypt($data['dl_number']),
+            'phone_number' => $data['phone_number'],
         ]);
     }
 }

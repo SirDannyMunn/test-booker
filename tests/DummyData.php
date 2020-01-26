@@ -11,9 +11,9 @@ class DummyData
 
     private $location;
 
-    public function __construct($location)
+    public function __construct()
     {
-        $this->location = $location;
+        $this->location = array_random(['Skipton', 'Blackburn']);
     }
 
     public function makeNewDummySlots($amount, $dataPath)
@@ -22,7 +22,7 @@ class DummyData
 
             $time = explode(':', Arr::random($this->times));
 
-            return today()->addDays(rand(0, 60))
+            return $random_date_time = today()->addDays(rand(0, 60))
                           ->startOfWeek()
                           ->addDays(rand(0, 4))
                           ->setTime($time[0], $time[1])
